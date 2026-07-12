@@ -53,40 +53,9 @@ Java·MySQL·Git 사전 요구, `GITHUB_TOKEN`/`CURSOR_API_KEY` 설정, `bootRun
 
 시작 버튼 disabled, Agent 400 validation, Composer fallback, 재클론 실패, MySQL/Flyway 오류 등 운영 중 자주 겪는 이슈와 해결 방법을 정리했습니다.
 
-<br>
+## [6. AI Agent Harness](docs/git_hub_readme/06-ai-agent-harness.md)
 
----
-
-<br>
-
-## AI Agent Harness
-
-본 저장소는 애플리케이션 코드뿐 아니라, **Cursor AI 에이전트가 역할·권한·인수인계 규칙에 따라 협업하도록 설계한 하네스**([`.cursorrules`](.cursorrules))를 함께 공개합니다.
-
-### 멀티 에이전트 역할 분리
-
-| 에이전트 | 역할 | 권한 |
-|--------|------|------|
-| **@AgentA** | PRD·API·DB·화면 흐름 기획 | `docs/` 기획 문서 작성 전용 |
-| **@AgentC** | v3 기능 구현 (Spring + Cursor API) | 코드·`TECH_SPEC` 작성, `docs/` Read-Only |
-| **@AgentB** | 통합 테스트·E2E·회귀 디버깅 | `src/test/**` 중심, 신규 기능 구현은 @AgentC 영역 |
-
-기획 → 구현 → 테스트가 **한 에이전트에 섞이지 않도록** 페르소나·산출물·금지 사항을 `.cursorrules`에 명시했습니다.
-
-### Handoff Protocol
-
-* 작업 시작 시 **`STATUS.md` 동기화** → 완료 시 **Append-only** 인수인계
-* 기본 체인: `@AgentA` → `@AgentC` → `@AgentB`
-* 기획과 구현이 어긋나면 코드를 먼저 바꾸지 않고, 역할에 맞는 문서에 기록 후 다음 에이전트로 넘김
-
-### LOCKED 정책 (에이전트 공통 금지)
-
-* JGit **force push** 금지
-* `GITHUB_TOKEN` / `CURSOR_API_KEY` **환경변수 ref만** — DB·로그·UI·예외 메시지 미노출
-* Cursor `autoCreatePR=true` 금지 — upstream PR은 Spring `PullRequestService` 단일 출구
-* Cloud Agent 모델 **`composer-2.5` Fast (`fast=true`)** 코드 상수 고정
-
-> 상세 규칙·프로젝트 구조·인수인계 포맷은 [`.cursorrules`](.cursorrules)를 참고하세요.
+Cursor 멀티 에이전트(@AgentA/@AgentC/@AgentB) 역할 분리, Handoff Protocol, LOCKED 정책 및 [`.cursorrules`](.cursorrules) 하네스 설계를 설명합니다.
 
 <br>
 
