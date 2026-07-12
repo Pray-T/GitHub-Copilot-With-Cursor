@@ -1,4 +1,4 @@
-# 6. AI Agent Harness (v3)
+# 6. AI Agent Harness
 
 ## 개요
 
