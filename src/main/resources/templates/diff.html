@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('변경점 확인 · ' + ${diff.repoOwner + '/' + diff.repoName})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container container-wide">
+
+    <section class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></section>
+    <section class="alert alert-info" th:if="${infoMessage}" th:text="${infoMessage}"></section>
+
+    <section class="card">
+        <h1 class="card-title">
+            <span th:text="${diff.repoOwner + '/' + diff.repoName}">owner/repo</span>
+            <small class="muted" th:text="'· ' + ${diff.totalChangedFiles} + '개 파일 변경'">· 0개 파일 변경</small>
+            <small class="badge" th:if="${workspace != null}" th:text="${workspace.mode}">REVIEW</small>
+        </h1>
+        <dl class="info-list info-list-inline">
+            <dt>기준 커밋</dt><dd><code th:text="${diff.headCommitSha}">sha</code> <span class="muted">(클론 직후 HEAD)</span></dd>
+            <dt>비교 시각</dt><dd th:text="${#temporals.format(diff.comparedAt, 'yyyy-MM-dd HH:mm:ss')}">-</dd>
+        </dl>
+        <section class="alert alert-info">
+            변경점은 <strong>클론 직후 HEAD</strong>와 현재 작업 트리(Working Tree)를 비교합니다.
+            이 기준점은 의도적으로 고정되어 있어, 로컬에서 커밋을 만든 뒤에도 클론 시점 대비 누적 변경을 계속 확인할 수 있습니다.
+        </section>
+        <div class="action-row">
+            <form th:action="@{/web/workspaces/{repoOwner}/{repoName}/launch-ide(repoOwner=${diff.repoOwner}, repoName=${diff.repoName})}"
+                  method="post"
+                  class="inline-form">
+                <button type="submit" class="btn btn-primary">추가 수정</button>
+            </form>
+
+            <form th:if="${!reviewMode}"
+                  id="pr-prepare-form"
+                  th:action="@{/web/workspaces/{repoOwner}/{repoName}/pr/prepare(repoOwner=${diff.repoOwner}, repoName=${diff.repoName})}"
+                  method="post"
+                  class="inline-form">
+                <button type="submit" class="btn btn-primary" id="pr-prepare-btn">PR 진행</button>
+            </form>
+
+            <a th:if="${reviewMode}" class="btn btn-secondary" th:href="@{/web}">Review 종료(보관)</a>
+
+            <a class="btn btn-secondary"
+               th:href="@{/web/workspaces/{repoOwner}/{repoName}/wait(repoOwner=${diff.repoOwner}, repoName=${diff.repoName})}">대기 화면으로</a>
+            <div th:replace="~{fragments/workspace-actions :: restart(${workspace != null ? workspace.repoOwner : diff.repoOwner}, ${workspace != null ? workspace.repoName : diff.repoName})}"></div>
+        </div>
+    </section>
+
+    <section class="card" th:if="${diff.totalChangedFiles == 0}">
+        <p class="card-desc">변경된 파일이 없습니다. 「추가 수정」으로 Cursor IDE를 열거나 Cloud Agent 결과를 다시 확인해 주세요.</p>
+    </section>
+
+    <details class="card file-card" th:each="file : ${diff.files}">
+        <summary class="file-summary">
+            <span class="badge"
+                  th:classappend="|badge-${#strings.toLowerCase(file.changeType)}|"
+                  th:text="${file.changeType}">MODIFIED</span>
+            <span class="file-path" th:text="${file.path}">path</span>
+            <small class="muted"
+                   th:if="${file.oldPath}"
+                   th:text="' (이전 경로: ' + ${file.oldPath} + ')'">old path</small>
+            <small class="muted">
+                <span th:text="${file.originalSize} + ' B → ' + ${file.newSize} + ' B'">0 B</span>
+            </small>
+            <small class="toggle-hint">클릭하여 변경 내용 보기</small>
+        </summary>
+
+        <div class="file-body">
+            <section class="alert alert-info" th:if="${file.metadataOnly}">
+                파일 내용은 동일하고 권한·메타데이터만 변경되었습니다.
+            </section>
+            <section class="alert alert-warn" th:if="${file.binary}">
+                바이너리 파일이므로 내용 비교를 표시하지 않습니다.
+            </section>
+            <section class="alert alert-warn" th:if="${file.truncated and not file.binary}">
+                파일 크기 제한을 초과하여 일부 내용이 잘렸습니다.
+            </section>
+
+            <div class="diff-scroll" th:if="${not file.binary and not #lists.isEmpty(file.rows)}">
+            <p class="card-desc diff-changed-only-hint">변경된 줄만 표시합니다.</p>
+            <table class="diff-table">
+                <colgroup>
+                    <col class="col-num">
+                    <col class="col-text">
+                    <col class="col-num">
+                    <col class="col-text">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th colspan="2">원본 (HEAD)</th>
+                        <th colspan="2">현재 (Working Tree)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row : ${file.rows}"
+                        th:class="'row-' + ${#strings.toLowerCase(row.tag)}">
+                        <td class="num" th:text="${row.oldLineNumber}">1</td>
+                        <td class="text-cell">
+                            <span th:if="${row.oldText != null and !#strings.isEmpty(row.oldText)}"
+                                  th:text="${row.oldText}">old line</span>
+                            <span th:if="${row.oldText == null or #strings.isEmpty(row.oldText)}"
+                                  class="diff-empty-line">&nbsp;</span>
+                        </td>
+                        <td class="num" th:text="${row.newLineNumber}">1</td>
+                        <td class="text-cell">
+                            <span th:if="${row.newText != null and !#strings.isEmpty(row.newText)}"
+                                  th:text="${row.newText}">new line</span>
+                            <span th:if="${row.newText == null or #strings.isEmpty(row.newText)}"
+                                  class="diff-empty-line">&nbsp;</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+
+            <p class="card-desc"
+               th:if="${not file.binary and not file.metadataOnly and #lists.isEmpty(file.rows) and not file.truncated}">
+                표시할 줄이 없습니다. (빈 파일이거나 동일한 내용)
+            </p>
+        </div>
+    </details>
+
+</main>
+
+<div th:if="${!reviewMode}"
+     id="pr-prepare-overlay"
+     class="modal-overlay pr-prepare-overlay"
+     role="alertdialog"
+     aria-modal="true"
+     aria-labelledby="pr-prepare-title"
+     aria-busy="true">
+    <div class="modal-dialog pr-prepare-dialog">
+        <div class="pr-prepare-loading">
+            <span class="agent-live-spinner" aria-hidden="true"></span>
+            <div class="pr-prepare-loading-text">
+                <strong id="pr-prepare-title">PR 설명 생성 중</strong>
+                <p class="agent-live-message">Agent가 변경된 데이터에 맞춰 PR 설명을 생성중입니다...</p>
+                <small>Composer가 commit 메시지와 PR 본문을 작성하고 있습니다. 잠시만 기다려주세요.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:if="${!reviewMode}">
+    (function () {
+        const form = document.getElementById('pr-prepare-form');
+        const overlay = document.getElementById('pr-prepare-overlay');
+        const submitBtn = document.getElementById('pr-prepare-btn');
+        if (!form || !overlay) {
+            return;
+        }
+        form.addEventListener('submit', function () {
+            overlay.classList.add('is-open');
+            document.body.classList.add('pr-prepare-busy');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '생성 중…';
+            }
+            form.querySelectorAll('button[type="submit"]').forEach(function (button) {
+                button.disabled = true;
+            });
+        });
+    })();
+</script>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('PR 준비 · ' + ${workspace.repoOwner + '/' + workspace.repoName})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+
+    <section class="alert alert-info" th:if="${infoMessage}" th:text="${infoMessage}"></section>
+    <section class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></section>
+    <section class="alert alert-warn" th:if="${existingPrUrl}">
+        동일한 head 조합으로 이미 열린 PR이 있습니다:
+        <a th:href="${existingPrUrl}" th:text="${existingPrUrl}" target="_blank" rel="noopener">기존 PR</a>
+    </section>
+
+    <section class="card">
+        <h1 class="card-title">Pull Request 생성</h1>
+        <p class="card-desc" th:if="${workspace.prUrl == null}">
+            upstream 저장소로 draft PR을 생성합니다. 제목·본문은 「PR 진행」 시 Composer가 생성한 값으로 pre-fill되며 수정할 수 있습니다.
+        </p>
+        <p class="card-desc" th:if="${workspace.prUrl != null}">
+            이미 PR이 생성되었습니다.
+        </p>
+        <dl class="info-list">
+            <dt>저장소</dt><dd th:text="${workspace.repoOwner + '/' + workspace.repoName}">owner/repo</dd>
+            <dt>Fork URL</dt><dd th:text="${workspace.forkUrl}">fork</dd>
+            <dt>작업 브랜치</dt><dd><code th:text="${workspace.branchName}">branch</code></dd>
+            <dt th:if="${workspace.prUrl != null}">PR URL</dt>
+            <dd th:if="${workspace.prUrl != null}">
+                <a th:href="${workspace.prUrl}" th:text="${workspace.prUrl}" target="_blank" rel="noopener">PR</a>
+            </dd>
+        </dl>
+
+        <form th:if="${workspace.prUrl == null}"
+              th:action="@{/web/workspaces/{repoOwner}/{repoName}/create-pr(repoOwner=${workspace.repoOwner}, repoName=${workspace.repoName})}"
+              method="post"
+              class="stack-form">
+            <label for="title">PR Title</label>
+            <input id="title"
+                   name="title"
+                   type="text"
+                   maxlength="256"
+                   required
+                   th:value="${submittedTitle != null ? submittedTitle : prDraft.title}">
+
+            <label for="body">PR Body</label>
+            <textarea id="body"
+                      name="body"
+                      rows="10"
+                      maxlength="65535"
+                      required
+                      th:text="${submittedBody != null ? submittedBody : prDraft.body}"></textarea>
+
+            <label for="base">Base Branch</label>
+            <input id="base"
+                   name="base"
+                   type="text"
+                   th:value="${submittedBase != null ? submittedBase : prDraft.base}">
+
+            <label class="mode-option">
+                <input type="checkbox"
+                       name="draft"
+                       value="true"
+                       th:checked="${submittedDraft != null ? submittedDraft : prDraft.draft}">
+                Draft PR로 생성
+            </label>
+
+            <div class="action-row">
+                <button type="submit" class="btn btn-primary btn-lg">PR 만들기</button>
+                <a class="btn btn-secondary"
+                   th:href="@{/web/workspaces/{repoOwner}/{repoName}/diff(repoOwner=${workspace.repoOwner}, repoName=${workspace.repoName})}">변경점 다시 보기</a>
+            </div>
+        </form>
+
+        <div class="action-row">
+            <a class="btn btn-secondary" th:href="@{/web}">처음으로</a>
+            <div th:replace="~{fragments/workspace-actions :: restart(${workspace.repoOwner}, ${workspace.repoName})}"></div>
+        </div>
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

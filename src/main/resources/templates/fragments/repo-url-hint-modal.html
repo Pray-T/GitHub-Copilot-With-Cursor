@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="modal" id="repo-url-hint-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="repo-url-hint-title">
+    <div class="modal-dialog">
+        <h2 id="repo-url-hint-title" class="modal-title">GitHub URL 입력 안내</h2>
+        <p class="modal-desc">아래는 자주 하는 실수 예시입니다.</p>
+        <ul class="repo-url-hint-list">
+            <li class="hint-item">
+                <div class="hint-item-title">맨 뒤 <code>/</code> 제거</div>
+                <div class="hint-example hint-bad">
+                    <span class="hint-label">잘못된 예</span>
+                    <code>https://github.com/owner/repo/</code>
+                </div>
+                <div class="hint-example hint-good">
+                    <span class="hint-label">올바른 예</span>
+                    <code>https://github.com/owner/repo</code>
+                </div>
+            </li>
+            <li class="hint-item">
+                <div class="hint-item-title"><code>https</code> 사용 (<code>http</code> 불가)</div>
+                <div class="hint-example hint-bad">
+                    <span class="hint-label">잘못된 예</span>
+                    <code>http://github.com/owner/repo</code>
+                </div>
+                <div class="hint-example hint-good">
+                    <span class="hint-label">올바른 예</span>
+                    <code>https://github.com/owner/repo</code>
+                </div>
+            </li>
+            <li class="hint-item">
+                <div class="hint-item-title">브랜치·파일 경로 제거 (주소창 복사 시 흔함)</div>
+                <div class="hint-example hint-bad">
+                    <span class="hint-label">잘못된 예</span>
+                    <code>https://github.com/owner/repo/tree/main</code>
+                </div>
+                <div class="hint-example hint-good">
+                    <span class="hint-label">올바른 예</span>
+                    <code>https://github.com/owner/repo</code>
+                </div>
+            </li>
+            <li class="hint-item">
+                <div class="hint-item-title">올바른 형식</div>
+                <div class="hint-example hint-good hint-example-single">
+                    <span class="hint-label">형식</span>
+                    <code>https://github.com/{owner}/{repo}</code>
+                </div>
+            </li>
+        </ul>
+        <p class="modal-footnote">예시의 상황이 아닌지 확인해주세요.</p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-primary" id="repo-url-hint-close">확인</button>
+        </div>
+    </div>
+</div>
+<script th:fragment="script">
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = document.getElementById('repo-url-hint-modal');
+        if (!modal) {
+            return;
+        }
+        modal.classList.add('is-open');
+        var closeButton = document.getElementById('repo-url-hint-close');
+        function closeModal() {
+            modal.classList.remove('is-open');
+        }
+        if (closeButton) {
+            closeButton.addEventListener('click', closeModal);
+        }
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    });
+</script>
+</body>
+</html>

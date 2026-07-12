@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Agent 대기 · ' + ${workspace.repoOwner + '/' + workspace.repoName})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+
+    <section class="card">
+        <section id="agent-live-banner" class="agent-live-banner agent-live-banner-running" aria-live="polite">
+            <div class="agent-live-banner-inner">
+                <span id="agent-live-spinner" class="agent-live-spinner" aria-hidden="true"></span>
+                <div class="agent-live-banner-text">
+                    <strong id="agent-live-title">Cursor Agent 작업 중</strong>
+                    <p id="agent-live-message" class="agent-live-message">Cursor Agent가 fork 브랜치에서 코드를 수정 중입니다.</p>
+                    <small id="agent-live-updated">마지막 갱신: 확인 중…</small>
+                </div>
+            </div>
+        </section>
+
+        <h1 class="card-title">Cursor Cloud Agent 실행 중</h1>
+        <p class="card-desc">
+            Agent가 fork 브랜치에 변경을 push하면 Spring이 자동으로 pull한 뒤 Diff를 확인할 수 있습니다.
+        </p>
+
+        <section class="alert alert-info notice-panel">
+            <p class="notice-heading">사전 고지</p>
+            <ul class="notice-list">
+                <li>fork·branch·commit이 <strong>GitHub(본인 fork)</strong>에 기록으로 남습니다.</li>
+                <li><strong>로컬 워크스페이스 경로</strong>에도 clone·pull 사본이 남습니다.</li>
+                <li th:if="${workspace.mode == 'REVIEW'}"><strong>PR은 생성하지 않습니다.</strong> 기여가 목적이면 처음으로 돌아가 Contribute를 선택하세요.</li>
+                <li th:if="${workspace.mode == 'CONTRIBUTE'}">Contribute 모드입니다. Diff 후 「PR 진행」으로 upstream PR을 생성할 수 있습니다.</li>
+                <li>아래에 표시된 <strong>fork URL · branch · 로컬 경로</strong>가 실제로 사용된 값입니다.</li>
+            </ul>
+        </section>
+
+        <dl class="info-list">
+            <dt>저장소</dt><dd th:text="${workspace.repoOwner + '/' + workspace.repoName}">owner/repo</dd>
+            <dt>모드</dt><dd th:text="${workspace.mode}">REVIEW</dd>
+            <dt>Upstream URL</dt><dd th:text="${workspace.upstreamUrl}">upstream</dd>
+            <dt>Fork URL</dt><dd th:text="${workspace.forkUrl}">fork</dd>
+            <dt>Fork 재사용</dt><dd th:text="${workspace.forkReused ? '예' : '아니오'}">아니오</dd>
+            <dt>작업 브랜치</dt><dd><code th:text="${workspace.branchName}">branch</code></dd>
+            <dt>로컬 경로</dt><dd><code th:text="${workspace.workspacePath}">path</code></dd>
+            <dt>워크스페이스 상태</dt>
+            <dd>
+                <span class="badge"
+                      th:classappend="|badge-${#strings.toLowerCase(workspace.status)}|"
+                      th:text="${workspace.status}">STATUS</span>
+            </dd>
+            <dt>Agent 상태</dt>
+            <dd>
+                <span id="agent-status-badge" class="badge"
+                      th:text="${workspace.agentStatus != null ? workspace.agentStatus : 'PENDING'}">RUNNING</span>
+            </dd>
+            <dt>Agent ID</dt><dd><code id="agent-id" th:text="${workspace.agentStatus != null ? '…' : '-'}">-</code></dd>
+        </dl>
+
+        <section class="alert alert-warn" id="agent-error-panel" hidden>
+            <span id="agent-error-message"></span>
+        </section>
+
+        <div class="action-row wait-action-row">
+            <a id="diff-link"
+               class="btn btn-primary"
+               th:href="@{/web/workspaces/{repoOwner}/{repoName}/diff(repoOwner=${workspace.repoOwner}, repoName=${workspace.repoName})}"
+               th:hidden="${workspace.agentStatus != 'COMPLETED' and workspace.agentStatus != 'SYNCING'}">
+                변경 확인
+            </a>
+            <button type="button" class="btn btn-secondary" id="show-agent-prompt-btn">내가 요청한 프롬프트</button>
+            <a class="btn btn-secondary" th:href="@{/web}">처음으로</a>
+            <div th:replace="~{fragments/workspace-actions :: restart(${workspace.repoOwner}, ${workspace.repoName})}"></div>
+        </div>
+        <div class="wait-auxiliary-actions"
+             id="cancel-action"
+             th:hidden="${workspace.agentStatus != 'RUNNING'}">
+            <form th:action="@{/web/workspaces/{repoOwner}/{repoName}/agent/cancel(repoOwner=${workspace.repoOwner}, repoName=${workspace.repoName})}"
+                  method="post"
+                  class="inline-form">
+                <button type="submit" class="btn btn-auxiliary" id="cancel-btn">작동중인 Agent 취소</button>
+            </form>
+        </div>
+    </section>
+
+</main>
+
+<div id="agent-prompt-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="agent-prompt-title">
+    <div class="modal-dialog modal-dialog-prompt">
+        <h2 id="agent-prompt-title" class="modal-title">내가 요청한 프롬프트</h2>
+        <p class="modal-desc">Cloud Agent 시작 시 입력한 프롬프트입니다.</p>
+        <pre id="agent-prompt-body"
+             class="agent-prompt-body"
+             th:if="${workspace.agentPrompt != null and !#strings.isEmpty(workspace.agentPrompt)}"
+             th:text="${workspace.agentPrompt}">prompt</pre>
+        <p class="agent-prompt-empty"
+           th:if="${workspace.agentPrompt == null or #strings.isEmpty(workspace.agentPrompt)}">
+            저장된 프롬프트가 없습니다.
+        </p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-primary" id="agent-prompt-close">닫기</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const repoOwner = /*[[${workspace.repoOwner}]]*/ 'owner';
+    const repoName = /*[[${workspace.repoName}]]*/ 'repo';
+    const mode = /*[[${workspace.mode}]]*/ 'REVIEW';
+    const pollIntervalMs = /*[[${pollIntervalMs}]]*/ 5000;
+    const statusUrl = '/api/agents/' + encodeURIComponent(repoOwner) + '/' + encodeURIComponent(repoName) + '/status';
+    const diffLink = document.getElementById('diff-link');
+    const statusBadge = document.getElementById('agent-status-badge');
+    const agentIdEl = document.getElementById('agent-id');
+    const errorPanel = document.getElementById('agent-error-panel');
+    const errorMessage = document.getElementById('agent-error-message');
+    const cancelAction = document.getElementById('cancel-action');
+    const liveBanner = document.getElementById('agent-live-banner');
+    const liveTitle = document.getElementById('agent-live-title');
+    const liveMessage = document.getElementById('agent-live-message');
+    const liveUpdated = document.getElementById('agent-live-updated');
+    const liveSpinner = document.getElementById('agent-live-spinner');
+    const initialAgentStatus = /*[[${workspace.agentStatus != null ? workspace.agentStatus : 'PENDING'}]]*/ 'PENDING';
+
+    const BANNER_CONFIG = {
+        PENDING: {
+            variant: 'running',
+            title: 'Cursor Agent 준비 중',
+            message: 'Agent를 시작하고 있습니다. 잠시만 기다려주세요.'
+        },
+        RUNNING: {
+            variant: 'running',
+            title: 'Cursor Agent 작업 중',
+            message: 'Cursor Agent가 fork 브랜치에서 코드를 수정 중입니다.'
+        },
+        SYNCING: {
+            variant: 'success',
+            title: '변경 사항 동기화 중',
+            message: 'Agent가 push한 변경을\n로컬 워크스페이스로 가져오는 중입니다.'
+        },
+        COMPLETED: {
+            variant: 'success',
+            title: 'Agent 작업 완료',
+            message: '코드 수정이 완료되었습니다.\n아래 「변경 확인」 버튼을 눌러 확인하세요.'
+        },
+        FAILED: {
+            variant: 'error',
+            title: 'Agent 작업 실패',
+            message: 'Agent 실행 중 오류가 발생했습니다.\n아래 오류 메시지를 확인하세요.'
+        },
+        CANCELLED: {
+            variant: 'error',
+            title: 'Agent 작업 취소됨',
+            message: 'Agent 작업이 취소되었습니다.\n처음으로 돌아가 다시 시작할 수 있습니다.'
+        }
+    };
+
+    function showDiffLink() {
+        if (!diffLink) {
+            return;
+        }
+        diffLink.hidden = false;
+    }
+
+    function updateCancelVisibility(status) {
+        if (!cancelAction) {
+            return;
+        }
+        cancelAction.hidden = status !== 'RUNNING';
+    }
+
+    function updateLiveBanner(status) {
+        const config = BANNER_CONFIG[status];
+        if (!config || !liveBanner) {
+            if (liveBanner) {
+                liveBanner.hidden = true;
+            }
+            return;
+        }
+        liveBanner.hidden = false;
+        liveBanner.className = 'agent-live-banner agent-live-banner-' + config.variant;
+        liveTitle.textContent = config.title;
+        liveMessage.textContent = config.message;
+        liveSpinner.hidden = config.variant !== 'running';
+        liveUpdated.textContent = '마지막 갱신: ' + new Date().toLocaleTimeString('ko-KR');
+    }
+
+    function showError(msg) {
+        if (!msg) return;
+        errorPanel.hidden = false;
+        errorMessage.textContent = msg;
+    }
+
+    async function pollStatus() {
+        try {
+            const response = await fetch(statusUrl);
+            const body = await response.json();
+            if (!response.ok) {
+                showError(body.message || 'Agent 상태 조회에 실패했습니다.');
+                if (response.status === 502) {
+                    updateCancelVisibility('FAILED');
+                }
+                return;
+            }
+            if (body.agentId) {
+                agentIdEl.textContent = body.agentId;
+            }
+            if (body.agentStatus) {
+                statusBadge.textContent = body.agentStatus;
+                updateLiveBanner(body.agentStatus);
+                updateCancelVisibility(body.agentStatus);
+            }
+            if (body.details && body.details.cursorMessage) {
+                showError(body.details.cursorMessage);
+            }
+            if (body.agentStatus === 'COMPLETED' || body.agentStatus === 'SYNCING') {
+                showDiffLink();
+            }
+        } catch (err) {
+            showError('네트워크 오류로 Agent 상태를 가져오지 못했습니다.');
+        }
+    }
+
+    updateLiveBanner(initialAgentStatus);
+    updateCancelVisibility(initialAgentStatus);
+    if (initialAgentStatus === 'COMPLETED' || initialAgentStatus === 'SYNCING') {
+        showDiffLink();
+    }
+
+    pollStatus();
+    setInterval(pollStatus, pollIntervalMs);
+
+    const promptModal = document.getElementById('agent-prompt-modal');
+    const showPromptBtn = document.getElementById('show-agent-prompt-btn');
+    const closePromptBtn = document.getElementById('agent-prompt-close');
+    function openPromptModal() {
+        if (promptModal) {
+            promptModal.classList.add('is-open');
+        }
+    }
+    function closePromptModal() {
+        if (promptModal) {
+            promptModal.classList.remove('is-open');
+        }
+    }
+    if (showPromptBtn) {
+        showPromptBtn.addEventListener('click', openPromptModal);
+    }
+    if (closePromptBtn) {
+        closePromptBtn.addEventListener('click', closePromptModal);
+    }
+    if (promptModal) {
+        promptModal.addEventListener('click', function (event) {
+            if (event.target === promptModal) {
+                closePromptModal();
+            }
+        });
+    }
+</script>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

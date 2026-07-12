@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="restart(repoOwner, repoName)">
+    <form th:action="@{/web/workspaces/{repoOwner}/{repoName}/delete(repoOwner=${repoOwner}, repoName=${repoName})}"
+          method="post"
+          class="inline-form"
+          onsubmit="return confirm('이 워크스페이스를 삭제하고 처음부터 다시 시작할까요?');">
+        <button type="submit" class="btn btn-danger">삭제</button>
+    </form>
+</th:block>
+<th:block th:fragment="delete(repoOwner, repoName)">
+    <form th:action="@{/web/workspaces/{repoOwner}/{repoName}/delete(repoOwner=${repoOwner}, repoName=${repoName})}"
+          method="post"
+          class="inline-form"
+          onsubmit="return confirm('이 워크스페이스를 삭제할까요?');">
+        <button type="submit" class="btn btn-sm btn-danger">삭제</button>
+    </form>
+</th:block>
+</body>
+</html>

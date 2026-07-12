@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('GitHubCoPilotWithCursor')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container">
+
+    <section class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></section>
+    <section class="alert alert-warn" th:if="${conflictRepoOwner != null and conflictRepoName != null}">
+        <a th:href="|#ws-${conflictRepoOwner}-${conflictRepoName}|">활성 워크스페이스 목록</a>에서 해당 저장소를 삭제한 뒤 다시 시도하세요.
+    </section>
+    <section class="alert alert-info" th:if="${infoMessage}" th:text="${infoMessage}"></section>
+
+    <section class="card">
+        <h1 class="card-title">GitHub 저장소 + Cloud Agent</h1>
+        <p class="card-desc">
+            GitHub URL과 Agent 프롬프트를 입력하면 fork·branch를 준비하고 Cursor Cloud Agent가 1차 수정합니다.
+            Diff 확인 후 필요 시에만 로컬 IDE(Cursor)로 추가 수정할 수 있습니다.
+        </p>
+        <form th:action="@{/web/clone}" method="post" class="clone-form">
+            <label for="repoUrl">GitHub Repository URL</label>
+            <input
+                id="repoUrl"
+                name="repoUrl"
+                type="url"
+                required
+                placeholder="https://github.com/owner/repo"
+                th:value="${submittedRepoUrl}"
+                autocomplete="off">
+            <label for="agentPrompt">Agent 프롬프트</label>
+            <textarea
+                id="agentPrompt"
+                name="agentPrompt"
+                rows="4"
+                required
+                maxlength="8192"
+                placeholder="예: Owner.java를 Java 17 record로 리팩터링하되 public API는 유지하세요."
+                th:text="${submittedAgentPrompt}"></textarea>
+            <label class="mode-option">
+                <input type="checkbox"
+                       name="mode"
+                       value="CONTRIBUTE"
+                       th:disabled="${!contributeEnabled}">
+                Contribute 모드 (upstream PR 생성 가능)
+            </label>
+            <p class="card-desc" th:if="${!githubEnabled}">
+                환경변수 <code>GITHUB_TOKEN</code>을 설정한 뒤 앱을 재시작하세요.
+            </p>
+            <p class="card-desc" th:if="${!cursorEnabled}">
+                환경변수 <code>CURSOR_API_KEY</code>를 설정한 뒤 앱을 재시작하세요.
+            </p>
+            <section class="alert alert-info notice-panel">
+                <strong>Review 기본:</strong> fork·branch가 GitHub와 로컬에 남으며 PR은 생성하지 않습니다.
+                기여 목적이면 Contribute를 선택하세요.
+            </section>
+            <button type="submit" class="btn btn-primary" th:disabled="${!contributeEnabled}">
+                Cloud Agent 시작
+            </button>
+        </form>
+        <p class="card-desc">
+            「새로 시작」으로 삭제한 직후 같은 URL을 다시 시작할 때 실패하면, Cursor 등 IDE에서 이전 워크스페이스 폴더를 닫은 뒤 재시도하세요.
+        </p>
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">활성 워크스페이스</h2>
+        <p class="card-desc" th:if="${#lists.isEmpty(workspaces)}">
+            아직 시작한 저장소가 없습니다. 위 입력창에 URL과 프롬프트를 넣어 시작하세요.
+        </p>
+        <div class="workspace-table-wrapper" th:if="${not #lists.isEmpty(workspaces)}">
+        <table class="workspace-table">
+            <thead>
+                <tr>
+                    <th>저장소</th>
+                    <th class="workspace-col-inline">모드</th>
+                    <th class="workspace-col-inline">상태</th>
+                    <th class="workspace-col-inline">Agent</th>
+                    <th class="workspace-col-inline workspace-col-cloned-at">클론&nbsp;시각</th>
+                    <th class="workspace-col-inline workspace-col-actions">작업</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="ws : ${workspaces}"
+                    th:id="|ws-${ws.repoOwner}-${ws.repoName}|"
+                    class="workspace-row"
+                    th:classappend="${ws.agentStatus == 'RUNNING' or ws.agentStatus == 'PENDING'} ? ' workspace-row-agent-active' : ''"
+                    th:attr="data-repo-owner=${ws.repoOwner}, data-repo-name=${ws.repoName}">
+                    <td>
+                        <div class="workspace-repo-meta">
+                            <div class="workspace-repo-name" th:text="${ws.repoOwner + '/' + ws.repoName}">owner/repo</div>
+                            <div class="workspace-repo-url" th:text="${ws.repoUrl}">url</div>
+                            <div class="workspace-repo-branch"
+                                 th:if="${ws.branchName != null}"
+                                 th:text="'branch: ' + ${ws.branchName}">branch</div>
+                            <a th:if="${ws.prUrl != null}"
+                               class="badge badge-pr-link"
+                               th:href="${ws.prUrl}"
+                               target="_blank"
+                               rel="noopener noreferrer">PR</a>
+                        </div>
+                    </td>
+                    <td class="workspace-col-inline">
+                        <span class="badge"
+                              th:classappend="${ws.mode == 'CONTRIBUTE'} ? 'badge-contribute' : 'badge-review'"
+                              th:text="${ws.mode}">REVIEW</span>
+                    </td>
+                    <td class="workspace-col-inline">
+                        <span class="badge workspace-status-badge"
+                              th:classappend="|badge-${#strings.toLowerCase(ws.status)}|"
+                              th:text="${ws.status}">STATUS</span>
+                    </td>
+                    <td class="workspace-col-inline">
+                        <div class="workspace-agent-cell">
+                        <span th:if="${ws.agentStatus != null}"
+                              class="badge workspace-agent-badge"
+                              th:classappend="|badge-agent-${#strings.toLowerCase(ws.agentStatus)} ${ws.agentStatus == 'RUNNING' or ws.agentStatus == 'PENDING' ? 'badge-agent-pulse' : ''}|"
+                              th:text="${ws.agentStatus}">-</span>
+                        <span th:if="${ws.agentStatus == null}">-</span>
+                        <span class="workspace-agent-working-label"
+                              th:if="${ws.agentStatus == 'RUNNING' or ws.agentStatus == 'PENDING'}">작업 중</span>
+                        </div>
+                    </td>
+                    <td class="workspace-col-inline workspace-col-cloned-at" th:text="${#temporals.format(ws.clonedAt, 'yyyy-MM-dd HH:mm')}">-</td>
+                    <td class="workspace-col-inline workspace-col-actions">
+                        <div class="workspace-actions-cell">
+                        <a class="btn btn-sm workspace-wait-link"
+                           th:href="@{/web/workspaces/{repoOwner}/{repoName}/wait(repoOwner=${ws.repoOwner}, repoName=${ws.repoName})}"
+                           th:classappend="${ws.agentStatus == 'RUNNING' or ws.agentStatus == 'PENDING'} ? ' btn-agent-progress' : ''"
+                           th:text="${ws.agentStatus == 'RUNNING' or ws.agentStatus == 'PENDING'} ? '진행 중' : '대기'">대기</a>
+                        <a class="btn btn-sm workspace-diff-link"
+                           th:if="${ws.status == 'READY_FOR_REVIEW'}"
+                           th:href="@{/web/workspaces/{repoOwner}/{repoName}/diff(repoOwner=${ws.repoOwner}, repoName=${ws.repoName})}">Diff</a>
+                        <th:block th:replace="~{fragments/workspace-actions :: delete(${ws.repoOwner}, ${ws.repoName})}"></th:block>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+</main>
+
+<th:block th:if="${showRepoUrlHintPopup}">
+    <div th:replace="~{fragments/repo-url-hint-modal :: modal}"></div>
+    <script th:replace="~{fragments/repo-url-hint-modal :: script}"></script>
+</th:block>
+
+<script th:if="${not #lists.isEmpty(workspaces)}" th:inline="javascript">
+    const workspacePollIntervalMs = /*[[${workspacePollIntervalMs}]]*/ 5000;
+    const ACTIVE_AGENT_STATUSES = ['PENDING', 'RUNNING'];
+
+    function isAgentActive(status) {
+        return ACTIVE_AGENT_STATUSES.includes(status);
+    }
+
+    function agentBadgeClass(status) {
+        if (!status) {
+            return '';
+        }
+        const base = 'badge badge-agent-' + status.toLowerCase();
+        return isAgentActive(status) ? base + ' badge-agent-pulse workspace-agent-badge' : base + ' workspace-agent-badge';
+    }
+
+    function updateWorkspaceRow(workspace) {
+        const row = document.getElementById('ws-' + workspace.repoOwner + '-' + workspace.repoName);
+        if (!row) {
+            return;
+        }
+
+        const agentActive = isAgentActive(workspace.agentStatus);
+        row.classList.toggle('workspace-row-agent-active', agentActive);
+
+        const agentCell = row.querySelector('.workspace-agent-cell');
+        if (agentCell) {
+            if (workspace.agentStatus) {
+                agentCell.innerHTML =
+                    '<span class="' + agentBadgeClass(workspace.agentStatus) + '">' + workspace.agentStatus + '</span>' +
+                    (agentActive ? '<span class="workspace-agent-working-label">작업 중</span>' : '');
+            } else {
+                agentCell.textContent = '-';
+            }
+        }
+
+        const statusBadge = row.querySelector('.workspace-status-badge');
+        if (statusBadge && workspace.status) {
+            statusBadge.textContent = workspace.status;
+            statusBadge.className = 'badge workspace-status-badge badge-' + workspace.status.toLowerCase();
+        }
+
+        const waitLink = row.querySelector('.workspace-wait-link');
+        if (waitLink) {
+            waitLink.textContent = agentActive ? '진행 중' : '대기';
+            waitLink.classList.toggle('btn-agent-progress', agentActive);
+        }
+
+        let diffLink = row.querySelector('.workspace-diff-link');
+        if (workspace.status === 'READY_FOR_REVIEW') {
+            if (!diffLink) {
+                const actionsCell = row.querySelector('.workspace-actions-cell');
+                diffLink = document.createElement('a');
+                diffLink.className = 'btn btn-sm workspace-diff-link';
+                diffLink.textContent = 'Diff';
+                diffLink.href = '/web/workspaces/' + encodeURIComponent(workspace.repoOwner) +
+                    '/' + encodeURIComponent(workspace.repoName) + '/diff';
+                const deleteForm = actionsCell.querySelector('form.inline-form');
+                if (deleteForm) {
+                    actionsCell.insertBefore(diffLink, deleteForm);
+                } else {
+                    actionsCell.appendChild(diffLink);
+                }
+            }
+            diffLink.hidden = false;
+        } else if (diffLink) {
+            diffLink.remove();
+        }
+    }
+
+    async function refreshWorkspaceAgentStatus() {
+        try {
+            const response = await fetch('/api/workspaces');
+            const body = await response.json();
+            if (!response.ok || !body.items) {
+                return;
+            }
+            body.items.forEach(updateWorkspaceRow);
+        } catch (error) {
+            // 목록 갱신 실패는 조용히 무시 (다음 폴링에서 재시도)
+        }
+    }
+
+    refreshWorkspaceAgentStatus();
+    setInterval(refreshWorkspaceAgentStatus, workspacePollIntervalMs);
+</script>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
