@@ -55,7 +55,7 @@ Java·MySQL·Git 사전 요구, `GITHUB_TOKEN`/`CURSOR_API_KEY` 설정, `bootRun
 
 ## [6. AI 에이전트 역할 분리 & 인수인계](docs/git_hub_readme/06-agent-roles-handoff.md)
 
-@AgentA/@AgentC/@AgentB 역할·모델 분리, Handoff Protocol, LOCKED 정책, 토큰·비용 절감 설계 및 [`.cursorrules`](.cursorrules) 협업 규칙을 설명합니다.
+@AgentA/@AgentC/@AgentB 역할·모델 분리, Handoff Protocol, LOCKED 정책, [토큰·비용 절감 설계](docs/git_hub_readme/06-agent-roles-handoff.md#멀티-에이전트와-토큰비용-절감)(추정), 컨텍스트 압축 미사용 명시 및 [`.cursorrules`](.cursorrules) 협업 규칙을 설명합니다.
 
 <br>
 
