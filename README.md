@@ -53,9 +53,9 @@ Java·MySQL·Git 사전 요구, `GITHUB_TOKEN`/`CURSOR_API_KEY` 설정, `bootRun
 
 시작 버튼 disabled, Agent 400 validation, Composer fallback, 재클론 실패, MySQL/Flyway 오류 등 운영 중 자주 겪는 이슈와 해결 방법을 정리했습니다.
 
-## [6. AI Agent Harness](docs/git_hub_readme/06-ai-agent-harness.md)
+## [6. AI 에이전트 역할 분리 & 인수인계](docs/git_hub_readme/06-agent-roles-handoff.md)
 
-Cursor 멀티 에이전트(@AgentA/@AgentC/@AgentB) 역할 분리, Handoff Protocol, LOCKED 정책 및 [`.cursorrules`](.cursorrules) 하네스 설계를 설명합니다.
+@AgentA/@AgentC/@AgentB 역할·모델 분리, Handoff Protocol, LOCKED 정책, 토큰·비용 절감 설계 및 [`.cursorrules`](.cursorrules) 협업 규칙을 설명합니다.
 
 <br>
 
