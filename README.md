@@ -89,8 +89,23 @@ Diff 후 「추가 수정」이 필요하면 로컬 **Cursor IDE**(`cursor` CLI)
 
 ## Screenshots
 
-> 로컬 실행 후 `docs/images/`에 캡처를 추가할 수 있습니다.  
-> 권장: `index` · `wait` · `diff` · `pr`
+로컬 실행(`http://localhost:8080`) 기준 실제 UI 캡처입니다.
+
+### 메인 — GitHub URL + Agent 프롬프트
+
+![메인 화면 — 워크스페이스 목록](docs/images/index.png)
+
+### Agent 대기 (완료 후 Diff 이동 전)
+
+![Agent 대기 화면](docs/images/wait.png)
+
+### Diff 확인
+
+![Diff 화면](docs/images/diff.png)
+
+### Pull Request (Contribute)
+
+![PR 화면](docs/images/pr.png)
 
 <br>
 

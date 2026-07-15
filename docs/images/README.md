@@ -1,16 +1,18 @@
 # docs/images
 
-포트폴리오 README [Screenshots](../../README.md#screenshots) 섹션용 캡처를 이 폴더에 넣습니다.
+포트폴리오 README [Screenshots](../../README.md#screenshots)용 UI 캡처입니다.
 
-권장 파일명:
+| 파일 | 화면 |
+|------|------|
+| `index.png` | 메인 — URL·프롬프트 입력 + 워크스페이스 목록 |
+| `wait.png` | Agent 대기 (완료 상태) |
+| `diff.png` | Diff — 변경 파일 목록 |
+| `pr.png` | PR 생성/확인 (Contribute) |
 
-- `index.png` — 워크스페이스 목록
-- `wait.png` — Agent 대기
-- `diff.png` — Diff 화면
-- `pr.png` — PR 폼
+재촬영 (앱 기동 후, Windows Edge headless 예시):
 
-README 예시:
-
-```markdown
-![메인 화면](docs/images/index.png)
+```powershell
+$edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+$img = "docs/images"
+& $edge --headless=new --disable-gpu --window-size=1280,1200 --screenshot="$img/index.png" http://localhost:8080/
 ```
