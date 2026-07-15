@@ -1,6 +1,6 @@
 # 2. 주요 기능 (v3)
 
-> 포트폴리오 README의 [Workflow](../../README.md#workflow) · API 참고 문서입니다.
+> 포트폴리오 README [상세 문서](../../README.md#상세-문서)의 2번 보완 페이지입니다.
 
 ## Review
 

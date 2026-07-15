@@ -1,6 +1,6 @@
 # 1. 아키텍처 (v3)
 
-> 포트폴리오 README의 [Architecture](../../README.md#architecture) 보완 문서입니다.
+> 포트폴리오 README [상세 문서](../../README.md#상세-문서)의 1번 보완 페이지입니다.
 
 ## 한 줄 요약
 

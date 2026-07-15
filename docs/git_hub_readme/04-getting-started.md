@@ -1,6 +1,6 @@
 # 4. 실행 가이드 (v3)
 
-> 포트폴리오 README의 [Quick Start](../../README.md#quick-start) 보완 문서입니다.
+> 포트폴리오 README [상세 문서](../../README.md#상세-문서)의 4번 보완 페이지입니다.
 
 ## 사전 요구
 
