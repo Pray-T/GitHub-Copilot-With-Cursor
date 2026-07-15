@@ -9,10 +9,10 @@
 | `diff.png` | Diff — 변경 파일 목록 |
 | `pr.png` | PR 생성/확인 (Contribute) |
 
-재촬영 (앱 기동 후, Windows Edge headless 예시):
+저장소명·URL·로컬 경로는 **`demo-owner/sample-app`** 예시 값으로 마스킹되어 있습니다.
+
+재마스킹 (원본 PNG를 git에서 복원한 뒤 실행):
 
 ```powershell
-$edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
-$img = "docs/images"
-& $edge --headless=new --disable-gpu --window-size=1280,1200 --screenshot="$img/index.png" http://localhost:8080/
+powershell -ExecutionPolicy Bypass -File docs/images/mask-screenshots.ps1
 ```
