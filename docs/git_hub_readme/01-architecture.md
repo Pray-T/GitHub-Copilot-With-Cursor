@@ -1,17 +1,10 @@
 # 1. 아키텍처 (v3)
 
+> 포트폴리오 README의 [Architecture](../../README.md#architecture) 보완 문서입니다.
+
 ## 한 줄 요약
 
 Browser → Spring Boot(:8080) → Cursor Cloud Agents API + GitHub API + JGit + MySQL
-
-## v3 변경 (v2 대비)
-
-- clone 직후 IDE 자동 실행 **폐기** → Diff 후 「추가 수정」(M1)에서만 `launch-ide`
-- Read-Only → **Review**: fork·branch·Agent push·Diff·로컬 보관 (PR 없음)
-- **A1**: Agent push → Spring `fetch` + `pull --ff-only` → Diff(`headCommitSha` vs working tree)
-- **Contribute**: Diff 후 **Composer follow-up 1회** (`pr/prepare`) → commit/PR pre-fill
-
-용어는 [README Glossary](../../README.md#용어-glossary) 참고.
 
 ## 흐름 (Review·Contribute 공통)
 
@@ -59,6 +52,6 @@ GitHub URL `https://github.com/{repoOwner}/{repoName}`에서 추출합니다.
 
 ## 화면
 
-`index` → `wait`(Agent 5초 폴링) → `diff` → (M1) IDE / (Contribute) `commit` → `pr`
+`index` → `wait`(Agent 5초 폴링) → `diff` → (선택) IDE / (Contribute) `commit` → `pr`
 
 Contribute에서 uncommitted 변경이 없으면 `commit` 단계를 건너뛸 수 있습니다.

@@ -1,12 +1,14 @@
 # 2. 주요 기능 (v3)
 
+> 포트폴리오 README의 [Workflow](../../README.md#workflow) · API 참고 문서입니다.
+
 ## Review
 
 1. GitHub URL + Agent 프롬프트 입력 (`POST /web/clone`)
 2. fork·feature branch·remote push 준비
 3. Cursor Cloud Agent 실행 (`composer-2.5` Fast, `autoCreatePR=false`)
 4. wait 화면 5초 폴링 → 완료 시 sync → Diff
-5. 「Review 종료(보관)」 또는 「추가 수정」(M1: `cursor` CLI IDE)
+5. 「Review 종료(보관)」 또는 「추가 수정」(로컬 `cursor` CLI IDE)
 
 ## Contribute
 
@@ -15,11 +17,6 @@ Review와 동일 + Diff에서 「PR 진행」:
 - `POST /api/contribute/{repoOwner}/{repoName}/pr/prepare` — repo Agent **follow-up run** 1회 (실패 시 fallback)
 - uncommitted 있으면 commit 폼 → push → PR 폼
 - upstream draft PR 생성 (`PullRequestService` 단일 출구)
-
-## 워크스페이스 목록 (index)
-
-- mode / status / agentStatus 배지
-- PR URL 링크 배지 (Contribute PR 생성 후)
 
 ## REST API 요약
 
@@ -38,9 +35,9 @@ Review와 동일 + Diff에서 「PR 진행」:
 | POST | `/api/contribute/{repoOwner}/{repoName}/commit-push` | commit + push |
 | POST | `/api/contribute/{repoOwner}/{repoName}/pull-request` | upstream PR 생성 |
 | GET | `/api/workspaces` | 워크스페이스 목록 |
-| POST | `/api/workspaces/{repoOwner}/{repoName}/launch-ide` | M1 IDE 실행 (REST) |
+| POST | `/api/workspaces/{repoOwner}/{repoName}/launch-ide` | IDE 실행 (REST) |
 | DELETE | `/api/workspaces/{repoOwner}/{repoName}` | 로컬 DB·디스크 삭제 |
-| POST | `/api/clone` | **Legacy** v1 클론 API (Agent flow와 별개) |
+| POST | `/api/clone` | Legacy v1 클론 API |
 
 ## Web UI 경로
 
@@ -50,7 +47,7 @@ Review와 동일 + Diff에서 「PR 진행」:
 | POST | `/web/clone` | Review/Contribute 시작 |
 | GET | `/web/workspaces/{repoOwner}/{repoName}/wait` | Agent 대기 |
 | GET | `/web/workspaces/{repoOwner}/{repoName}/diff` | Diff 화면 |
-| POST | `/web/workspaces/{repoOwner}/{repoName}/launch-ide` | M1 IDE |
+| POST | `/web/workspaces/{repoOwner}/{repoName}/launch-ide` | IDE 실행 |
 | POST | `/web/workspaces/{repoOwner}/{repoName}/pr/prepare` | PR 메타 준비 |
 | GET | `/web/workspaces/{repoOwner}/{repoName}/commit` | commit 폼 |
 | POST | `/web/workspaces/{repoOwner}/{repoName}/commit-push` | commit + push |
@@ -60,5 +57,4 @@ Review와 동일 + Diff에서 「PR 진행」:
 
 ## 운영 주의
 
-- **워크스페이스 삭제** (`DELETE /api/workspaces/...` 또는 Web delete): 로컬 DB·디스크만 정리됩니다.
-- **GitHub fork branch·PR**은 자동 삭제되지 않습니다 — 필요 시 GitHub에서 수동 정리.
+- **워크스페이스 삭제**: 로컬 DB·디스크만 정리. GitHub fork branch·PR은 수동 정리.
