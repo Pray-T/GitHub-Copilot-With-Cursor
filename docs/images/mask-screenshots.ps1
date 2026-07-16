@@ -9,10 +9,42 @@ $demoBranch = "refactor/sample-app-demo"
 $demoPrUrl = "https://github.com/$demoOwner/$demoRepo/pull/1"
 $demoPath = "C:\demo\refactor-workspace\$demoOwner\$demoRepo"
 
-function Mask-Rect($graphics, [int]$x, [int]$y, [int]$w, [int]$h, [string]$color = "#ffffff") {
-    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml($color))
-    $graphics.FillRectangle($brush, $x, $y, $w, $h)
-    $brush.Dispose()
+function Pixelate-Region(
+    [System.Drawing.Bitmap]$bmp,
+    [int]$rx, [int]$ry, [int]$rw, [int]$rh,
+    [int]$blockSize
+) {
+    $xEnd = [Math]::Min($rx + $rw, $bmp.Width)
+    $yEnd = [Math]::Min($ry + $rh, $bmp.Height)
+    for ($by = $ry; $by -lt $yEnd; $by += $blockSize) {
+        $bh = [Math]::Min($blockSize, $yEnd - $by)
+        for ($bx = $rx; $bx -lt $xEnd; $bx += $blockSize) {
+            $bw = [Math]::Min($blockSize, $xEnd - $bx)
+            $r = 0; $g = 0; $b = 0; $n = 0
+            for ($y = $by; $y -lt $by + $bh; $y++) {
+                for ($x = $bx; $x -lt $bx + $bw; $x++) {
+                    $c = $bmp.GetPixel($x, $y)
+                    $r += $c.R; $g += $c.G; $b += $c.B; $n++
+                }
+            }
+            if ($n -eq 0) { continue }
+            $avg = [System.Drawing.Color]::FromArgb($r / $n, $g / $n, $b / $n)
+            for ($y = $by; $y -lt $by + $bh; $y++) {
+                for ($x = $bx; $x -lt $bx + $bw; $x++) {
+                    $bmp.SetPixel($x, $y, $avg)
+                }
+            }
+        }
+    }
+}
+
+function Blur-Region(
+    [System.Drawing.Bitmap]$bmp,
+    [int]$rx, [int]$ry, [int]$rw, [int]$rh
+) {
+    Pixelate-Region $bmp $rx $ry $rw $rh 20
+    Pixelate-Region $bmp $rx $ry $rw $rh 12
+    Pixelate-Region $bmp $rx $ry $rw $rh 8
 }
 
 function Draw-Text($graphics, [string]$text, [int]$x, [int]$y, [single]$size, [string]$color, [bool]$bold = $false) {
@@ -30,10 +62,7 @@ function Process-Image([string]$fileName, [scriptblock]$draw) {
     $source = [System.Drawing.Image]::FromFile($path)
     $bitmap = New-Object System.Drawing.Bitmap $source
     $source.Dispose()
-    $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-    $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    & $draw $graphics
-    $graphics.Dispose()
+    & $draw $bitmap
     $bitmap.Save($tempPath, [System.Drawing.Imaging.ImageFormat]::Png)
     $bitmap.Dispose()
     Move-Item -Path $tempPath -Destination $path -Force
@@ -42,51 +71,57 @@ function Process-Image([string]$fileName, [scriptblock]$draw) {
 Set-Location (Split-Path $imgDir -Parent | Split-Path -Parent)
 git checkout 1d41dcd -- docs/images/index.png docs/images/wait.png docs/images/diff.png docs/images/pr.png | Out-Null
 
+# index.png — repo column; PR badge ~y940-958 untouched
 Process-Image "index.png" {
-    param($g)
-    $bg = "#f5f7fa"
-    Mask-Rect $g 230 860 252 78 $bg
-    Mask-Rect $g 230 954 252 44 $bg
+    param($bmp)
+    Blur-Region $bmp 208 846 288 88
+    Blur-Region $bmp 208 940 288 64
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
     Draw-Text $g $demoFull 242 868 11.5 "#1f2937" $true
     Draw-Text $g "$demoUrl.git" 244 896 9 "#6b7280"
     Draw-Text $g "branch: $demoBranch" 244 917 9 "#6b7280"
+    $g.Dispose()
 }
 
 Process-Image "diff.png" {
-    param($g)
-    Mask-Rect $g 48 143 420 30 "#ffffff"
+    param($bmp)
+    Blur-Region $bmp 40 134 520 48
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
     Draw-Text $g "$demoFull - 1 changed file" 52 148 15 "#1f2937" $true
+    $g.Dispose()
 }
 
+# wait.png — value cells; labels (x<248) and PR_OPENED badge preserved
 Process-Image "wait.png" {
-    param($g)
-    $bg = "#ffffff"
-    $pill = "#eef2ff"
-    Mask-Rect $g 358 628 288 20 $bg
-    Mask-Rect $g 348 686 455 26 $bg
-    Mask-Rect $g 348 716 435 24 $bg
-    Mask-Rect $g 385 768 410 26 $pill
-    Mask-Rect $g 385 784 410 22 $pill
-    Mask-Rect $g 385 812 575 30 $pill
+    param($bmp)
+    Blur-Region $bmp 346 618 325 36
+    Blur-Region $bmp 338 670 485 44
+    Blur-Region $bmp 338 700 475 42
+    Blur-Region $bmp 338 748 485 46
+    Blur-Region $bmp 338 774 635 36
+    Blur-Region $bmp 248 802 710 44
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
     Draw-Text $g $demoFull 362 634 10.5 "#1f2937"
-    Draw-Text $g "$demoUrl.git" 352 692 10 "#1f2937"
-    Draw-Text $g $demoUrl 352 722 10 "#2563eb"
-    Draw-Text $g $demoBranch 392 772 10 "#1f2937"
-    Draw-Text $g $demoPath 392 788 9.5 "#1f2937"
+    Draw-Text $g "$demoUrl.git" 352 688 10 "#1f2937"
+    Draw-Text $g $demoUrl 352 718 10 "#2563eb"
+    Draw-Text $g $demoBranch 392 766 10 "#1f2937"
+    Draw-Text $g $demoPath 392 784 9.5 "#1f2937"
+    $g.Dispose()
 }
 
+# pr.png — value cells; bottom buttons y>=360 preserved
 Process-Image "pr.png" {
-    param($g)
-    $bg = "#ffffff"
-    $pill = "#eef2ff"
-    Mask-Rect $g 332 224 288 28 $bg
-    Mask-Rect $g 325 256 420 28 $bg
-    Mask-Rect $g 278 286 478 28 $pill
-    Mask-Rect $g 325 316 468 28 $bg
+    param($bmp)
+    Blur-Region $bmp 328 212 305 44
+    Blur-Region $bmp 328 242 435 44
+    Blur-Region $bmp 328 272 465 46
+    Blur-Region $bmp 328 302 455 48
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
     Draw-Text $g $demoFull 354 236 10.5 "#1f2937"
-    Draw-Text $g $demoUrl 330 266 10 "#2563eb"
+    Draw-Text $g $demoUrl 330 264 10 "#2563eb"
     Draw-Text $g $demoBranch 290 296 10 "#1f2937"
-    Draw-Text $g $demoPrUrl 330 326 10 "#2563eb"
+    Draw-Text $g $demoPrUrl 330 324 10 "#2563eb"
+    $g.Dispose()
 }
 
-Write-Output "Masked portfolio screenshots (precision mode v6)."
+Write-Output "Masked portfolio screenshots (blur mode)."

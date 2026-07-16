@@ -9,7 +9,7 @@
 | `diff.png` | Diff — 변경 파일 목록 |
 | `pr.png` | PR 생성/확인 (Contribute) |
 
-저장소명·URL·로컬 경로는 **`demo-owner/sample-app`** 예시 값으로 마스킹되어 있습니다.
+저장소명·URL·로컬 경로는 원본을 **픽셀 블러(모자이크)** 처리한 뒤 **`demo-owner/sample-app`** 예시 값으로 대체되어 있습니다.
 
 재마스킹 (원본 PNG를 git에서 복원한 뒤 실행):
 
