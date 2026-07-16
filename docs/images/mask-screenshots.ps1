@@ -9,8 +9,8 @@ $demoBranch = "refactor/sample-app-demo"
 $demoPrUrl = "https://github.com/$demoOwner/$demoRepo/pull/1"
 $demoPath = "C:\demo\refactor-workspace\$demoOwner\$demoRepo"
 
-function Mask-Rect($graphics, [int]$x, [int]$y, [int]$w, [int]$h) {
-    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::White)
+function Mask-Rect($graphics, [int]$x, [int]$y, [int]$w, [int]$h, [string]$color = "#ffffff") {
+    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml($color))
     $graphics.FillRectangle($brush, $x, $y, $w, $h)
     $brush.Dispose()
 }
@@ -39,50 +39,54 @@ function Process-Image([string]$fileName, [scriptblock]$draw) {
     Move-Item -Path $tempPath -Destination $path -Force
 }
 
-# Restore originals before masking
 Set-Location (Split-Path $imgDir -Parent | Split-Path -Parent)
 git checkout 1d41dcd -- docs/images/index.png docs/images/wait.png docs/images/diff.png docs/images/pr.png | Out-Null
 
-# index.png — workspace table: repo name, .git URL, branch, PR badge
 Process-Image "index.png" {
     param($g)
-    Mask-Rect $g 62 842 500 185
-    Draw-Text $g $demoFull 68 868 12 "#1f2937" $true
-    Draw-Text $g "$demoUrl.git" 68 896 9 "#6b7280"
-    Draw-Text $g $demoBranch 68 917 9 "#6b7280"
-    # PR badge placeholder (non-sensitive)
-    $badgeBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml("#dbeafe"))
-    $g.FillRectangle($badgeBrush, 68, 948, 36, 22)
-    $badgeBrush.Dispose()
-    Draw-Text $g "PR" 76 950 9 "#1d4ed8" $true
+    $bg = "#f5f7fa"
+    Mask-Rect $g 230 860 252 78 $bg
+    Mask-Rect $g 230 954 252 44 $bg
+    Draw-Text $g $demoFull 242 868 11.5 "#1f2937" $true
+    Draw-Text $g "$demoUrl.git" 244 896 9 "#6b7280"
+    Draw-Text $g "branch: $demoBranch" 244 917 9 "#6b7280"
 }
 
-# diff.png — page title with owner/repo
 Process-Image "diff.png" {
     param($g)
-    Mask-Rect $g 44 142 700 32
-    Draw-Text $g "$demoFull - 1 changed file" 48 148 15 "#1f2937" $true
+    Mask-Rect $g 48 143 420 30 "#ffffff"
+    Draw-Text $g "$demoFull - 1 changed file" 52 148 15 "#1f2937" $true
 }
 
-# wait.png — repo, upstream .git URL, fork URL, branch, local path
 Process-Image "wait.png" {
     param($g)
-    Mask-Rect $g 198 626 1060 215
-    Draw-Text $g $demoFull 202 634 10.5 "#1f2937"
-    Draw-Text $g "$demoUrl.git" 202 664 10 "#1f2937"
-    Draw-Text $g $demoUrl 202 696 10 "#2563eb"
-    Draw-Text $g $demoBranch 202 728 10 "#1f2937"
-    Draw-Text $g $demoPath 202 788 9.5 "#1f2937"
+    $bg = "#ffffff"
+    $pill = "#eef2ff"
+    Mask-Rect $g 358 628 288 20 $bg
+    Mask-Rect $g 348 686 455 26 $bg
+    Mask-Rect $g 348 716 435 24 $bg
+    Mask-Rect $g 385 768 410 26 $pill
+    Mask-Rect $g 385 784 410 22 $pill
+    Mask-Rect $g 385 812 575 30 $pill
+    Draw-Text $g $demoFull 362 634 10.5 "#1f2937"
+    Draw-Text $g "$demoUrl.git" 352 692 10 "#1f2937"
+    Draw-Text $g $demoUrl 352 722 10 "#2563eb"
+    Draw-Text $g $demoBranch 392 772 10 "#1f2937"
+    Draw-Text $g $demoPath 392 788 9.5 "#1f2937"
 }
 
-# pr.png — repo, fork URL, branch, PR URL
 Process-Image "pr.png" {
     param($g)
-    Mask-Rect $g 198 228 1060 170
-    Draw-Text $g $demoFull 202 236 10.5 "#1f2937"
-    Draw-Text $g $demoUrl 202 268 10 "#2563eb"
-    Draw-Text $g $demoBranch 202 298 10 "#1f2937"
-    Draw-Text $g $demoPrUrl 202 380 10 "#2563eb"
+    $bg = "#ffffff"
+    $pill = "#eef2ff"
+    Mask-Rect $g 332 224 288 28 $bg
+    Mask-Rect $g 325 256 420 28 $bg
+    Mask-Rect $g 278 286 478 28 $pill
+    Mask-Rect $g 325 316 468 28 $bg
+    Draw-Text $g $demoFull 354 236 10.5 "#1f2937"
+    Draw-Text $g $demoUrl 330 266 10 "#2563eb"
+    Draw-Text $g $demoBranch 290 296 10 "#1f2937"
+    Draw-Text $g $demoPrUrl 330 326 10 "#2563eb"
 }
 
-Write-Output "Masked portfolio screenshots."
+Write-Output "Masked portfolio screenshots (precision mode v6)."
