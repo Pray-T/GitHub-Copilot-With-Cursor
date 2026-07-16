@@ -43,36 +43,46 @@ function Process-Image([string]$fileName, [scriptblock]$draw) {
 Set-Location (Split-Path $imgDir -Parent | Split-Path -Parent)
 git checkout 1d41dcd -- docs/images/index.png docs/images/wait.png docs/images/diff.png docs/images/pr.png | Out-Null
 
+# index.png — workspace table: repo name, .git URL, branch, PR badge
 Process-Image "index.png" {
     param($g)
-    Mask-Rect $g 78 878 760 88
-    Draw-Text $g $demoFull 82 884 12 "#1f2937" $true
-    Draw-Text $g "branch: $demoBranch" 82 918 9.5 "#6b7280"
+    Mask-Rect $g 62 842 500 185
+    Draw-Text $g $demoFull 68 868 12 "#1f2937" $true
+    Draw-Text $g "$demoUrl.git" 68 896 9 "#6b7280"
+    Draw-Text $g $demoBranch 68 917 9 "#6b7280"
+    # PR badge placeholder (non-sensitive)
+    $badgeBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml("#dbeafe"))
+    $g.FillRectangle($badgeBrush, 68, 948, 36, 22)
+    $badgeBrush.Dispose()
+    Draw-Text $g "PR" 76 950 9 "#1d4ed8" $true
 }
 
+# diff.png — page title with owner/repo
 Process-Image "diff.png" {
     param($g)
-    Mask-Rect $g 48 86 1220 78
-    Draw-Text $g "$demoFull - 1 changed file" 52 98 15 "#1f2937" $true
+    Mask-Rect $g 44 142 700 32
+    Draw-Text $g "$demoFull - 1 changed file" 48 148 15 "#1f2937" $true
 }
 
+# wait.png — repo, upstream .git URL, fork URL, branch, local path
 Process-Image "wait.png" {
     param($g)
-    Mask-Rect $g 168 618 1080 220
-    Draw-Text $g $demoFull 172 624 10.5 "#1f2937"
-    Draw-Text $g "$demoUrl.git" 172 664 10 "#1f2937"
-    Draw-Text $g $demoUrl 172 704 10 "#2563eb"
-    Draw-Text $g $demoBranch 172 744 10 "#1f2937"
-    Draw-Text $g $demoPath 172 784 9.5 "#1f2937"
+    Mask-Rect $g 198 626 1060 215
+    Draw-Text $g $demoFull 202 634 10.5 "#1f2937"
+    Draw-Text $g "$demoUrl.git" 202 664 10 "#1f2937"
+    Draw-Text $g $demoUrl 202 696 10 "#2563eb"
+    Draw-Text $g $demoBranch 202 728 10 "#1f2937"
+    Draw-Text $g $demoPath 202 788 9.5 "#1f2937"
 }
 
+# pr.png — repo, fork URL, branch, PR URL
 Process-Image "pr.png" {
     param($g)
-    Mask-Rect $g 168 182 1080 260
-    Draw-Text $g $demoFull 172 190 10.5 "#1f2937"
-    Draw-Text $g $demoUrl 172 240 10 "#2563eb"
-    Draw-Text $g $demoBranch 172 310 10 "#1f2937"
-    Draw-Text $g $demoPrUrl 172 380 10 "#2563eb"
+    Mask-Rect $g 198 228 1060 170
+    Draw-Text $g $demoFull 202 236 10.5 "#1f2937"
+    Draw-Text $g $demoUrl 202 268 10 "#2563eb"
+    Draw-Text $g $demoBranch 202 298 10 "#1f2937"
+    Draw-Text $g $demoPrUrl 202 380 10 "#2563eb"
 }
 
 Write-Output "Masked portfolio screenshots."
