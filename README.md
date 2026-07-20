@@ -69,17 +69,7 @@ Java·MySQL·Git 사전 요구, `GITHUB_TOKEN`/`CURSOR_API_KEY` 설정, `bootRun
 
 <br>
 
-## Screenshots
 
-로컬 실행(`http://localhost:8080`) 기준 실제 UI 캡처입니다.
-
-![메인 화면 — 워크스페이스 목록](./docs/images/index.png)
-
-![Agent 대기 화면](./docs/images/wait.png)
-
-![Diff 화면](./docs/images/diff.png)
-
-![PR 화면](./docs/images/pr.png)
 
 <br>
 
