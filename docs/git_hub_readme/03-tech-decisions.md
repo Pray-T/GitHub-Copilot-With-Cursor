@@ -1,6 +1,6 @@
-# 3. 기술 결정 (v3)
+# 3. 기술 결정
 
-> 포트폴리오 README [상세 문서](../../README.md#상세-문서)의 3번 보완 페이지입니다.
+ [메인 README로 돌아가기](../../README.md)
 
 ## Cursor Cloud Agent
 
