@@ -1,8 +1,6 @@
-# 2. 주요 기능 (v3)
+# 2. 주요 기능 
 
-> 포트폴리오 README [상세 문서](../../README.md#상세-문서)의 2번 보완 페이지입니다.
-
-## Review
+## Review 모드
 
 1. GitHub URL + Agent 프롬프트 입력 (`POST /web/clone`)
 2. fork·feature branch·remote push 준비
@@ -10,7 +8,7 @@
 4. wait 화면 5초 폴링 → 완료 시 sync → Diff
 5. 「Review 종료(보관)」 또는 「추가 수정」(로컬 `cursor` CLI IDE)
 
-## Contribute
+## Contribute 모드
 
 Review와 동일 + Diff에서 「PR 진행」:
 
@@ -57,4 +55,4 @@ Review와 동일 + Diff에서 「PR 진행」:
 
 ## 운영 주의
 
-- **워크스페이스 삭제**: 로컬 DB·디스크만 정리. GitHub fork branch·PR은 수동 정리.
+- **워크스페이스 삭제**: 로컬 DB·디스크만 정리. GitHub fork branch·PR은 수동으로 정리해줘야 합니다.
