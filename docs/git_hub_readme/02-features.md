@@ -20,8 +20,6 @@ Review와 동일 + Diff에서 「PR 진행」:
 
 ## REST API 요약
 
-상세 요청/응답 스키마는 [Swagger UI](http://localhost:8080/swagger-ui.html) 참고.
-
 | Method | Path | 용도 |
 |--------|------|------|
 | POST | `/api/contribute/start` | Contribute 워크스페이스 시작 (v3 주 경로) |
