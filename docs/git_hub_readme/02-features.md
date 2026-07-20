@@ -1,5 +1,7 @@
 # 2. 주요 기능 
 
+ [메인 README로 돌아가기](../../README.md)
+
 ## Review 모드
 
 1. GitHub URL + Agent 프롬프트 입력 (`POST /web/clone`)
