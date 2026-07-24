@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('변경점 확인 · ' + ${diff.repoOwner + '/' + diff.repoName})}"></head>
+<head th:replace="~{fragments/layout :: head('Diff 확인 · ' + ${diff.repoOwner + '/' + diff.repoName})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
 
@@ -10,7 +10,7 @@
     <section class="alert alert-info" th:if="${infoMessage}" th:text="${infoMessage}"></section>
     <section class="alert alert-warn" th:if="${llmMetadataStale and !reviewMode}">
         로컬 IDE에서 추가 수정한 내용이 이전에 생성된 PR 메타데이터(커밋 메시지·제목·본문)와 일치하지 않을 수 있습니다.
-        「PR 진행」을 다시 클릭하면 최신 변경점을 반영해 메타데이터를 새로 생성합니다.
+        「PR 진행」을 다시 클릭하면 최신 변경 사항을 반영해 PR 메타데이터를 새로 생성합니다.
     </section>
 
     <section class="card">
@@ -24,14 +24,15 @@
             <dt>비교 시각</dt><dd th:text="${#temporals.format(diff.comparedAt, 'yyyy-MM-dd HH:mm:ss')}">-</dd>
         </dl>
         <section class="alert alert-info">
-            변경점은 <strong>클론 직후 HEAD</strong>와 현재 작업 트리(Working Tree)를 비교합니다.
+            Diff는 <strong>클론 직후 HEAD</strong>와 현재 작업 트리(Working Tree)를 비교합니다.
             이 기준점은 의도적으로 고정되어 있어, 로컬에서 커밋을 만든 뒤에도 클론 시점 대비 누적 변경을 계속 확인할 수 있습니다.
         </section>
         <div class="action-row">
-            <form th:action="@{/web/workspaces/{repoOwner}/{repoName}/launch-ide(repoOwner=${diff.repoOwner}, repoName=${diff.repoName})}"
+            <form id="launch-ide-form"
+                  th:action="@{/web/workspaces/{repoOwner}/{repoName}/launch-ide(repoOwner=${diff.repoOwner}, repoName=${diff.repoName})}"
                   method="post"
                   class="inline-form">
-                <button type="submit" class="btn btn-primary">추가 수정</button>
+                <button type="submit" class="btn btn-primary" id="launch-ide-btn">추가 수정</button>
             </form>
 
             <form th:if="${!reviewMode}"
@@ -42,7 +43,7 @@
                 <button type="submit" class="btn btn-primary" id="pr-prepare-btn">PR 진행</button>
             </form>
 
-            <a th:if="${reviewMode}" class="btn btn-secondary" th:href="@{/web}">Review 종료(보관)</a>
+            <a th:if="${reviewMode}" class="btn btn-secondary" th:href="@{/web}">홈으로</a>
 
             <a class="btn btn-secondary"
                th:href="@{/web/workspaces/{repoOwner}/{repoName}/wait(repoOwner=${diff.repoOwner}, repoName=${diff.repoName})}">대기 화면으로</a>
@@ -127,6 +128,32 @@
 </main>
 
 <div th:if="${!reviewMode}"
+     id="launch-ide-confirm-overlay"
+     class="modal-overlay"
+     role="alertdialog"
+     aria-modal="true"
+     aria-labelledby="launch-ide-confirm-title">
+    <div class="modal-dialog">
+        <h2 id="launch-ide-confirm-title" class="modal-title">추가 수정 안내</h2>
+        <p class="modal-desc">
+            Cursor IDE에서 수정·저장한 뒤 대기 화면의 「변경 확인」으로 diff에 돌아오세요.
+        </p>
+        <section class="alert alert-warn notice-panel">
+            <p class="notice-heading">PR 메타데이터 반영</p>
+            <p>
+                IDE 수정 내용을 PR 메타데이터(커밋 메시지·제목·본문)에 반영하려면,
+                diff로 돌아온 뒤 <strong>「PR 진행」을 다시 클릭</strong>해야 합니다.
+                「변경 확인」만으로는 자동 갱신되지 않습니다.
+            </p>
+        </section>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="launch-ide-cancel-btn">취소</button>
+            <button type="button" class="btn btn-primary" id="launch-ide-confirm-btn">IDE 열기</button>
+        </div>
+    </div>
+</div>
+
+<div th:if="${!reviewMode}"
      id="pr-prepare-overlay"
      class="modal-overlay pr-prepare-overlay"
      role="alertdialog"
@@ -137,9 +164,9 @@
         <div class="pr-prepare-loading">
             <span class="agent-live-spinner" aria-hidden="true"></span>
             <div class="pr-prepare-loading-text">
-                <strong id="pr-prepare-title">PR 설명 생성 중</strong>
-                <p class="agent-live-message">Agent가 변경된 데이터에 맞춰 PR 설명을 생성중입니다...</p>
-                <small>Composer가 commit 메시지와 PR 본문을 작성하고 있습니다. 잠시만 기다려주세요.</small>
+                <strong id="pr-prepare-title">PR 메타데이터 생성 중</strong>
+                <p class="agent-live-message">Composer가 커밋 메시지·PR 제목·본문을 작성하고 있습니다.</p>
+                <small>잠시만 기다려 주세요.</small>
             </div>
         </div>
     </div>
@@ -147,6 +174,45 @@
 
 <script th:if="${!reviewMode}">
     (function () {
+        const launchIdeForm = document.getElementById('launch-ide-form');
+        const launchIdeOverlay = document.getElementById('launch-ide-confirm-overlay');
+        const launchIdeConfirmBtn = document.getElementById('launch-ide-confirm-btn');
+        const launchIdeCancelBtn = document.getElementById('launch-ide-cancel-btn');
+        let launchIdeConfirmed = false;
+
+        function closeLaunchIdeModal() {
+            if (launchIdeOverlay) {
+                launchIdeOverlay.classList.remove('is-open');
+            }
+        }
+
+        if (launchIdeForm && launchIdeOverlay) {
+            launchIdeForm.addEventListener('submit', function (event) {
+                if (launchIdeConfirmed) {
+                    return;
+                }
+                event.preventDefault();
+                launchIdeOverlay.classList.add('is-open');
+            });
+        }
+        if (launchIdeConfirmBtn && launchIdeForm) {
+            launchIdeConfirmBtn.addEventListener('click', function () {
+                launchIdeConfirmed = true;
+                closeLaunchIdeModal();
+                launchIdeForm.requestSubmit();
+            });
+        }
+        if (launchIdeCancelBtn) {
+            launchIdeCancelBtn.addEventListener('click', closeLaunchIdeModal);
+        }
+        if (launchIdeOverlay) {
+            launchIdeOverlay.addEventListener('click', function (event) {
+                if (event.target === launchIdeOverlay) {
+                    closeLaunchIdeModal();
+                }
+            });
+        }
+
         const form = document.getElementById('pr-prepare-form');
         const overlay = document.getElementById('pr-prepare-overlay');
         const submitBtn = document.getElementById('pr-prepare-btn');

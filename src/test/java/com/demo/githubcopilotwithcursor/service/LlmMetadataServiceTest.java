@@ -27,7 +27,7 @@ class LlmMetadataServiceTest {
     private CursorProperties cursorProperties;
     private CloudAgentClient cloudAgentClient;
     private WorkspaceService workspaceService;
-    private WorkspaceGuard workspaceGuard;
+    private WorkspaceGitStateService workspaceGitStateService;
     private DiffService diffService;
     private DiffFingerprintService diffFingerprintService;
     private PullRequestService pullRequestService;
@@ -38,18 +38,19 @@ class LlmMetadataServiceTest {
         cursorProperties = new CursorProperties();
         cloudAgentClient = org.mockito.Mockito.mock(CloudAgentClient.class);
         workspaceService = org.mockito.Mockito.mock(WorkspaceService.class);
-        workspaceGuard = org.mockito.Mockito.mock(WorkspaceGuard.class);
+        workspaceGitStateService = org.mockito.Mockito.mock(WorkspaceGitStateService.class);
         diffService = org.mockito.Mockito.mock(DiffService.class);
         diffFingerprintService = new DiffFingerprintService();
         pullRequestService = org.mockito.Mockito.mock(PullRequestService.class);
+        when(workspaceGitStateService.hasUncommittedChanges(any())).thenReturn(false);
         service = new LlmMetadataService(
             cursorProperties,
             cloudAgentClient,
             workspaceService,
-            workspaceGuard,
             diffService,
             diffFingerprintService,
-            pullRequestService
+            pullRequestService,
+            workspaceGitStateService
         );
     }
 
@@ -60,8 +61,6 @@ class LlmMetadataServiceTest {
         RepositoryWorkspace workspace = contributeWorkspace();
         workspace.cacheLlmMetadata("cached commit", "cached title", "cached body", OffsetDateTime.now(), fingerprint);
         when(workspaceService.requireContributeWorkspace("octocat", "demo")).thenReturn(workspace);
-        when(workspaceGuard.normalizeStoredPath(workspace.getWorkspacePath()))
-            .thenReturn(java.nio.file.Path.of(workspace.getWorkspacePath()));
         when(diffService.diffWithoutPersist(eq("octocat"), eq("demo"), eq(true), eq(0))).thenReturn(diff);
 
         PrPrepareResponse response = service.prepareForPr("octocat", "demo");
@@ -85,8 +84,6 @@ class LlmMetadataServiceTest {
             diffFingerprintService.compute(cachedDiff)
         );
         when(workspaceService.requireContributeWorkspace("octocat", "demo")).thenReturn(workspace);
-        when(workspaceGuard.normalizeStoredPath(workspace.getWorkspacePath()))
-            .thenReturn(java.nio.file.Path.of(workspace.getWorkspacePath()));
         when(diffService.diffWithoutPersist(eq("octocat"), eq("demo"), eq(true), eq(0))).thenReturn(currentDiff);
         when(cloudAgentClient.requestPrMetadataFollowUp(eq("bc-test-001"), any()))
             .thenReturn(new ComposerResponse("new commit", "new title", "new body"));
@@ -105,8 +102,6 @@ class LlmMetadataServiceTest {
         DiffResponse diff = sampleDiff("README.md", "MODIFIED", "fresh content");
         RepositoryWorkspace workspace = contributeWorkspace();
         when(workspaceService.requireContributeWorkspace("octocat", "demo")).thenReturn(workspace);
-        when(workspaceGuard.normalizeStoredPath(workspace.getWorkspacePath()))
-            .thenReturn(java.nio.file.Path.of(workspace.getWorkspacePath()));
         when(diffService.diffWithoutPersist(eq("octocat"), eq("demo"), eq(true), eq(0))).thenReturn(diff);
         when(cloudAgentClient.requestPrMetadataFollowUp(eq("bc-test-001"), any()))
             .thenReturn(new ComposerResponse("commit", "title", "body"));
@@ -131,8 +126,6 @@ class LlmMetadataServiceTest {
     void fallsBackWhenFollowUpFails() {
         RepositoryWorkspace workspace = contributeWorkspace();
         when(workspaceService.requireContributeWorkspace("octocat", "demo")).thenReturn(workspace);
-        when(workspaceGuard.normalizeStoredPath(workspace.getWorkspacePath()))
-            .thenReturn(java.nio.file.Path.of(workspace.getWorkspacePath()));
         when(diffService.diffWithoutPersist(eq("octocat"), eq("demo"), eq(true), eq(0)))
             .thenReturn(new DiffResponse("octocat", "demo", BASE_SHA, OffsetDateTime.now(), 0, List.of()));
         when(cloudAgentClient.requestPrMetadataFollowUp(eq("bc-test-001"), any()))

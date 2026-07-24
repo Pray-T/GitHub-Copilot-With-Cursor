@@ -210,6 +210,85 @@ class PrMetadataFingerprintIntegrationTest {
     }
 
     @Test
+    void ideEditBlocksDirectPrUntilRePreparedAndCommitted() throws Exception {
+        bootstrapContributeWorkspace();
+        Path workspacePath = WORKSPACE_ROOT.resolve(UPSTREAM_OWNER).resolve(repoName);
+        Files.writeString(workspacePath.resolve("README.md"), "# Demo\n\nAgent baseline change\n");
+
+        expectPrMetadataFollowUp(
+            "run-meta-first",
+            "feat: first metadata",
+            "First PR title",
+            "변경 요약"
+        );
+
+        mockMvc.perform(post("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/pr/prepare"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/commit"));
+        server.verify();
+        server.reset();
+
+        mockMvc.perform(post("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/commit-push")
+                .param("message", "feat: first metadata")
+                .param("authorName", "The Octocat")
+                .param("authorEmail", "octocat@example.com"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/pr"));
+
+        Files.writeString(workspacePath.resolve("README.md"), "# Demo\n\nAgent baseline change\n\nIDE extra line\n");
+
+        MvcResult blockedPrPage = mockMvc.perform(get("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/pr"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/diff"))
+            .andReturn();
+        assertThat(blockedPrPage.getFlashMap().get("errorMessage"))
+            .asString()
+            .contains("로컬 IDE에서 저장한 변경 사항이 아직 커밋되지 않았습니다");
+
+        MvcResult blockedCreatePr = mockMvc.perform(post("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/create-pr")
+                .param("title", "First PR title")
+                .param("body", "## 변경 요약\n\nIDE edit missing")
+                .param("base", "master")
+                .param("draft", "true"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/diff"))
+            .andReturn();
+        assertThat(blockedCreatePr.getFlashMap().get("errorMessage"))
+            .asString()
+            .contains("로컬 IDE에서 저장한 변경 사항이 아직 커밋되지 않았습니다");
+
+        expectPrMetadataFollowUp(
+            "run-meta-second",
+            "feat: regenerated after IDE edit",
+            "Regenerated PR title",
+            "IDE edit"
+        );
+
+        mockMvc.perform(post("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/pr/prepare"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/commit"));
+        server.verify();
+        server.reset();
+
+        mockMvc.perform(post("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/commit-push")
+                .param("message", "feat: regenerated after IDE edit")
+                .param("authorName", "The Octocat")
+                .param("authorEmail", "octocat@example.com"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/pr"));
+
+        server.reset();
+        expectDraftPageBaseLookup();
+
+        mockMvc.perform(get("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/pr"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Regenerated PR title")));
+
+        RepositoryWorkspace finalWorkspace = repository.findByRepoOwnerAndRepoName(UPSTREAM_OWNER, repoName).orElseThrow();
+        assertThat(finalWorkspace.getLlmCommitMessage()).isEqualTo("feat: regenerated after IDE edit");
+    }
+
+    @Test
     void apiPrepareExposesRegenerationFlagAfterIdeEdit() throws Exception {
         bootstrapContributeWorkspace();
         Path workspacePath = WORKSPACE_ROOT.resolve(UPSTREAM_OWNER).resolve(repoName);
@@ -266,6 +345,20 @@ class PrMetadataFingerprintIntegrationTest {
         workspaceService.saveWorkspace(workspace);
         server.verify();
         server.reset();
+    }
+
+    private void expectDraftPageBaseLookup() {
+        server.expect(requestTo("https://api.github.com/repos/" + UPSTREAM_OWNER + "/" + repoName))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("""
+                {
+                  "full_name": "%s/%s",
+                  "html_url": "https://github.com/%s/%s",
+                  "clone_url": "https://github.com/%s/%s.git",
+                  "default_branch": "master"
+                }
+                """.formatted(UPSTREAM_OWNER, repoName, UPSTREAM_OWNER, repoName, UPSTREAM_OWNER, repoName),
+                MediaType.APPLICATION_JSON));
     }
 
     private void expectContributeStartForkFlow() {

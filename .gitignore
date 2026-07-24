@@ -33,8 +33,10 @@ out/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
+### VS Code / Cursor ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 ### Secrets / local overrides ###
 .env

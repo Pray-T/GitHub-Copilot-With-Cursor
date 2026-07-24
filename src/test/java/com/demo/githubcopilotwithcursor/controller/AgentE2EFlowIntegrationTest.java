@@ -153,7 +153,7 @@ class AgentE2EFlowIntegrationTest {
 
         mockMvc.perform(get("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/diff"))
             .andExpect(status().isOk())
-            .andExpect(content().string(containsString("Review 종료")))
+            .andExpect(content().string(containsString("홈으로")))
             .andExpect(content().string(not(containsString("PR 진행"))))
             .andExpect(content().string(containsString("README.md")));
 

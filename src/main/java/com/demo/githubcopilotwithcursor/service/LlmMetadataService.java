@@ -9,12 +9,8 @@ import com.demo.githubcopilotwithcursor.domain.RepositoryWorkspace;
 import com.demo.githubcopilotwithcursor.dto.ChangedFileResponse;
 import com.demo.githubcopilotwithcursor.dto.DiffResponse;
 import com.demo.githubcopilotwithcursor.dto.PrPrepareResponse;
-import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.Status;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,27 +34,27 @@ public class LlmMetadataService {
     private final CursorProperties cursorProperties;
     private final CloudAgentClient cloudAgentClient;
     private final WorkspaceService workspaceService;
-    private final WorkspaceGuard workspaceGuard;
     private final DiffService diffService;
     private final DiffFingerprintService diffFingerprintService;
     private final PullRequestService pullRequestService;
+    private final WorkspaceGitStateService workspaceGitStateService;
 
     public LlmMetadataService(
         CursorProperties cursorProperties,
         CloudAgentClient cloudAgentClient,
         WorkspaceService workspaceService,
-        WorkspaceGuard workspaceGuard,
         DiffService diffService,
         DiffFingerprintService diffFingerprintService,
-        PullRequestService pullRequestService
+        PullRequestService pullRequestService,
+        WorkspaceGitStateService workspaceGitStateService
     ) {
         this.cursorProperties = cursorProperties;
         this.cloudAgentClient = cloudAgentClient;
         this.workspaceService = workspaceService;
-        this.workspaceGuard = workspaceGuard;
         this.diffService = diffService;
         this.diffFingerprintService = diffFingerprintService;
         this.pullRequestService = pullRequestService;
+        this.workspaceGitStateService = workspaceGitStateService;
     }
 
     @Transactional
@@ -66,7 +62,7 @@ public class LlmMetadataService {
         RepositoryWorkspace workspace = workspaceService.requireContributeWorkspace(repoOwner, repoName);
         DiffResponse diff = diffService.diffWithoutPersist(repoOwner, repoName, true, 0);
         String currentFingerprint = diffFingerprintService.compute(diff);
-        boolean hasLocalUncommitted = hasLocalUncommittedChanges(workspace);
+        boolean hasLocalUncommitted = workspaceGitStateService.hasUncommittedChanges(workspace);
         boolean hadCachedMetadata = hasCompleteCachedMetadata(workspace);
         String previousFingerprint = workspace.getLlmDiffFingerprint();
 
@@ -211,22 +207,6 @@ public class LlmMetadataService {
             case "RENAMED" -> "R";
             default -> "M";
         };
-    }
-
-    private boolean hasLocalUncommittedChanges(RepositoryWorkspace workspace) {
-        Path workspacePath = workspaceGuard.normalizeStoredPath(workspace.getWorkspacePath());
-        try (Git git = Git.open(workspacePath.toFile())) {
-            Status status = git.status().call();
-            return !status.isClean();
-        } catch (GitAPIException | java.io.IOException exception) {
-            log.warn(
-                "Could not read git status for {}/{}: {}",
-                workspace.getRepoOwner(),
-                workspace.getRepoName(),
-                exception.getMessage()
-            );
-            return false;
-        }
     }
 
     private PrPrepareResponse toResponse(

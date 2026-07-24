@@ -43,7 +43,7 @@
             <div class="action-row">
                 <button type="submit" class="btn btn-primary btn-lg">커밋 + Push</button>
                 <a class="btn btn-secondary"
-                   th:href="@{/web/workspaces/{repoOwner}/{repoName}/diff(repoOwner=${workspace.repoOwner}, repoName=${workspace.repoName})}">변경점으로 돌아가기</a>
+                   th:href="@{/web/workspaces/{repoOwner}/{repoName}/diff(repoOwner=${workspace.repoOwner}, repoName=${workspace.repoName})}">Diff로 돌아가기</a>
                 <div th:replace="~{fragments/workspace-actions :: restart(${workspace.repoOwner}, ${workspace.repoName})}"></div>
             </div>
         </form>

@@ -27,6 +27,7 @@ import com.demo.githubcopilotwithcursor.service.DiffViewModelBuilder;
 import com.demo.githubcopilotwithcursor.service.LlmMetadataService;
 import com.demo.githubcopilotwithcursor.service.LaunchIdeService;
 import com.demo.githubcopilotwithcursor.service.PullRequestService;
+import com.demo.githubcopilotwithcursor.service.WorkspaceGitStateService;
 import com.demo.githubcopilotwithcursor.service.WorkspaceGuard;
 import com.demo.githubcopilotwithcursor.service.WorkspaceService;
 import jakarta.validation.ConstraintViolation;
@@ -60,7 +61,18 @@ public class WorkbenchViewController {
         "로컬 IDE 추가 수정이 반영되어 PR 메타데이터를 새로 생성했습니다. "
             + "이전에 생성된 커밋 메시지, PR 제목, 본문과 다를 수 있습니다.";
     private static final String PR_PREPARE_FALLBACK_INFO =
-        "Composer 호출에 실패해 기본 PR 메타데이터를 사용합니다.";
+        "Composer 호출에 실패해 기본 PR 메타데이터를 생성했습니다.";
+    private static final String LAUNCH_IDE_INFO_REVIEW =
+        "Cursor IDE 실행을 요청했습니다. IDE에서 수정한 뒤 대기 화면의 「변경 확인」으로 돌아오세요.";
+    private static final String LAUNCH_IDE_INFO_CONTRIBUTE =
+        "Cursor IDE 실행을 요청했습니다. IDE에서 수정·저장한 뒤 「변경 확인」으로 diff에 돌아온 다음, "
+            + "PR 메타데이터(커밋 메시지·제목·본문)를 최신 변경에 반영하려면 「PR 진행」을 다시 클릭하세요.";
+    private static final String PR_FLOW_UNCOMMITTED_CHANGES =
+        "로컬 IDE에서 저장한 변경 사항이 아직 커밋되지 않았습니다. "
+            + "Diff 화면에서 「PR 진행」을 다시 클릭한 뒤 커밋·Push를 완료해 주세요.";
+    private static final String PR_FLOW_STALE_METADATA =
+        "로컬 IDE 추가 수정이 PR 메타데이터에 아직 반영되지 않았습니다. "
+            + "Diff 화면에서 「PR 진행」을 다시 클릭해 주세요.";
 
     private final CloneService cloneService;
     private final DiffService diffService;
@@ -77,6 +89,7 @@ public class WorkbenchViewController {
     private final CursorProperties cursorProperties;
     private final LaunchIdeService launchIdeService;
     private final LlmMetadataService llmMetadataService;
+    private final WorkspaceGitStateService workspaceGitStateService;
 
     public WorkbenchViewController(
         CloneService cloneService,
@@ -93,7 +106,8 @@ public class WorkbenchViewController {
         WorkspaceProperties workspaceProperties,
         CursorProperties cursorProperties,
         LaunchIdeService launchIdeService,
-        LlmMetadataService llmMetadataService
+        LlmMetadataService llmMetadataService,
+        WorkspaceGitStateService workspaceGitStateService
     ) {
         this.cloneService = cloneService;
         this.diffService = diffService;
@@ -110,6 +124,7 @@ public class WorkbenchViewController {
         this.cursorProperties = cursorProperties;
         this.launchIdeService = launchIdeService;
         this.llmMetadataService = llmMetadataService;
+        this.workspaceGitStateService = workspaceGitStateService;
     }
 
     @GetMapping({"", "/", "/web"})
@@ -239,9 +254,11 @@ public class WorkbenchViewController {
     ) {
         try {
             launchIdeService.launchIde(repoOwner, repoName);
+            WorkspaceResponse workspace = workspaceService.findWorkspace(repoOwner, repoName);
+            boolean contributeMode = WorkspaceMode.CONTRIBUTE.name().equalsIgnoreCase(workspace.mode());
             redirectAttributes.addFlashAttribute(
                 "infoMessage",
-                "Cursor IDE 실행을 요청했습니다. IDE에서 수정한 뒤 대기 화면의 「변경 확인」으로 돌아오세요."
+                contributeMode ? LAUNCH_IDE_INFO_CONTRIBUTE : LAUNCH_IDE_INFO_REVIEW
             );
         } catch (AppException exception) {
             redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
@@ -277,6 +294,25 @@ public class WorkbenchViewController {
         }
     }
 
+    private Optional<String> redirectIfNotReadyForPullRequest(
+        String repoOwner,
+        String repoName,
+        RedirectAttributes redirectAttributes,
+        boolean allowUncommittedChanges
+    ) {
+        RepositoryWorkspace entity = workspaceService.requireContributeWorkspace(repoOwner, repoName);
+        if (!allowUncommittedChanges && workspaceGitStateService.hasUncommittedChanges(entity)) {
+            redirectAttributes.addFlashAttribute("errorMessage", PR_FLOW_UNCOMMITTED_CHANGES);
+            return Optional.of(workspaceRedirect(repoOwner, repoName, "/diff"));
+        }
+        DiffResponse diff = diffService.diffWithoutPersist(repoOwner, repoName, true, 0);
+        if (llmMetadataService.isCachedMetadataStale(entity, diff)) {
+            redirectAttributes.addFlashAttribute("errorMessage", PR_FLOW_STALE_METADATA);
+            return Optional.of(workspaceRedirect(repoOwner, repoName, "/diff"));
+        }
+        return Optional.empty();
+    }
+
     @GetMapping("/web/workspaces/{repoOwner}/{repoName}/commit")
     public String commit(
         @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
@@ -294,6 +330,15 @@ public class WorkbenchViewController {
         if (workspace.llmCachedAt() == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "먼저 Diff 화면에서 「PR 진행」을 클릭해 주세요.");
             return workspaceRedirect(repoOwner, repoName, "/diff");
+        }
+        Optional<String> blocked = redirectIfNotReadyForPullRequest(
+            repoOwner,
+            repoName,
+            redirectAttributes,
+            true
+        );
+        if (blocked.isPresent()) {
+            return blocked.get();
         }
         model.addAttribute("workspace", workspace);
         model.addAttribute("authorName", gitHubAuth.defaultAuthorName());
@@ -352,6 +397,17 @@ public class WorkbenchViewController {
             redirectAttributes.addFlashAttribute("errorMessage", "먼저 Diff 화면에서 「PR 진행」을 클릭해 주세요.");
             return workspaceRedirect(repoOwner, repoName, "/diff");
         }
+        if (workspace.prUrl() == null || workspace.prUrl().isBlank()) {
+            Optional<String> blocked = redirectIfNotReadyForPullRequest(
+                repoOwner,
+                repoName,
+                redirectAttributes,
+                false
+            );
+            if (blocked.isPresent()) {
+                return blocked.get();
+            }
+        }
         model.addAttribute("workspace", workspace);
         if (workspace.prUrl() == null || workspace.prUrl().isBlank()) {
             PullRequestService.PullRequestDraft draft = pullRequestService.draft(repoOwner, repoName);
@@ -382,6 +438,16 @@ public class WorkbenchViewController {
             redirectAttributes.addFlashAttribute("submittedBase", base);
             redirectAttributes.addFlashAttribute("submittedDraft", draft);
             return workspaceRedirect(repoOwner, repoName, "/pr");
+        }
+
+        Optional<String> blocked = redirectIfNotReadyForPullRequest(
+            repoOwner,
+            repoName,
+            redirectAttributes,
+            false
+        );
+        if (blocked.isPresent()) {
+            return blocked.get();
         }
 
         try {

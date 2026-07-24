@@ -16,7 +16,7 @@
     <section class="card">
         <h1 class="card-title">Pull Request 생성</h1>
         <p class="card-desc" th:if="${workspace.prUrl == null}">
-            upstream 저장소로 draft PR을 생성합니다. 제목·본문은 「PR 진행」 시 Composer가 생성한 값으로 pre-fill되며 수정할 수 있습니다.
+            upstream 저장소로 draft PR을 생성합니다. PR 제목·본문은 「PR 진행」 시 Composer가 생성한 PR 메타데이터로 미리 채워지며 수정할 수 있습니다.
         </p>
         <p class="card-desc" th:if="${workspace.prUrl != null}">
             이미 PR이 생성되었습니다.
@@ -68,7 +68,7 @@
             <div class="action-row">
                 <button type="submit" class="btn btn-primary btn-lg">PR 만들기</button>
                 <a class="btn btn-secondary"
-                   th:href="@{/web/workspaces/{repoOwner}/{repoName}/diff(repoOwner=${workspace.repoOwner}, repoName=${workspace.repoName})}">변경점 다시 보기</a>
+                   th:href="@{/web/workspaces/{repoOwner}/{repoName}/diff(repoOwner=${workspace.repoOwner}, repoName=${workspace.repoName})}">Diff 다시 보기</a>
             </div>
         </form>
 

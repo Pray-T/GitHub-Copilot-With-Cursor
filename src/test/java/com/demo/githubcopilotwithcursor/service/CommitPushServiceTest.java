@@ -2,6 +2,7 @@ package com.demo.githubcopilotwithcursor.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,8 +11,10 @@ import static org.mockito.Mockito.when;
 import com.demo.githubcopilotwithcursor.config.GitHubProperties;
 import com.demo.githubcopilotwithcursor.config.WorkspaceProperties;
 import com.demo.githubcopilotwithcursor.domain.RepositoryWorkspace;
+import com.demo.githubcopilotwithcursor.dto.ChangedFileResponse;
 import com.demo.githubcopilotwithcursor.dto.CommitPushRequest;
 import com.demo.githubcopilotwithcursor.dto.CommitPushResponse;
+import com.demo.githubcopilotwithcursor.dto.DiffResponse;
 import com.demo.githubcopilotwithcursor.exception.AppException;
 import com.demo.githubcopilotwithcursor.exception.ErrorCode;
 import com.demo.githubcopilotwithcursor.github.GitHubAuth;
@@ -19,6 +22,8 @@ import com.demo.githubcopilotwithcursor.github.GitHubAuthenticatedUser;
 import com.demo.githubcopilotwithcursor.repository.RepositoryWorkspaceRepository;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ObjectId;
@@ -104,7 +109,9 @@ class CommitPushServiceTest {
             workspaceService,
             gitHubAuth,
             new CommitService(workspaceService),
-            new PushService(gitHubProperties, workspaceService)
+            new PushService(gitHubProperties, workspaceService),
+            mock(DiffService.class),
+            new DiffFingerprintService()
         );
 
         CommitPushResponse response = service.commitAndPush(
@@ -170,7 +177,9 @@ class CommitPushServiceTest {
             workspaceService,
             gitHubAuth,
             new CommitService(workspaceService),
-            new PushService(gitHubProperties, workspaceService)
+            new PushService(gitHubProperties, workspaceService),
+            mock(DiffService.class),
+            new DiffFingerprintService()
         );
 
         assertThatThrownBy(() -> service.commitAndPush(
@@ -184,6 +193,69 @@ class CommitPushServiceTest {
             });
 
         verify(reconcileService, atLeastOnce()).reconcileMissingDisk(REPO_OWNER, REPO_NAME);
+    }
+
+    @Test
+    void commitAndPushSyncsLlmDiffFingerprintAfterSuccessfulPush() {
+        Path workspacePath = tempDir.resolve("workspace-with-llm-cache");
+        RepositoryWorkspace workspaceEntity = new RepositoryWorkspace(
+            REPO_OWNER,
+            REPO_NAME,
+            "https://github.com/spring-projects/demo-repo",
+            workspacePath.toString(),
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "https://github.com/spring-projects/demo-repo",
+            "https://github.com/octocat/demo-repo",
+            true,
+            "refactor/demo-repo-202605011830"
+        );
+        workspaceEntity.cacheLlmMetadata(
+            "feat: cached metadata",
+            "Cached PR title",
+            "Cached PR body",
+            OffsetDateTime.now(),
+            "old-fingerprint"
+        );
+
+        GitHubAuth gitHubAuth = mock(GitHubAuth.class);
+        when(gitHubAuth.requireAuthenticatedUser())
+            .thenReturn(new GitHubAuthenticatedUser("octocat", "The Octocat", "octocat@example.com"));
+        WorkspaceService workspaceService = mock(WorkspaceService.class);
+        when(workspaceService.requireContributeWorkspace(REPO_OWNER, REPO_NAME)).thenReturn(workspaceEntity);
+        CommitService commitService = mock(CommitService.class);
+        when(commitService.commit(eq(REPO_OWNER), eq(REPO_NAME), eq(workspacePath), org.mockito.ArgumentMatchers.any()))
+            .thenReturn("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+        PushService pushService = mock(PushService.class);
+        DiffService diffService = mock(DiffService.class);
+        DiffResponse postCommitDiff = sampleDiff("README.md", "MODIFIED", "post commit content");
+        when(diffService.diffWithoutPersist(REPO_OWNER, REPO_NAME, true, 0)).thenReturn(postCommitDiff);
+        DiffFingerprintService diffFingerprintService = new DiffFingerprintService();
+        String expectedFingerprint = diffFingerprintService.compute(postCommitDiff);
+
+        CommitPushService service = new CommitPushService(
+            new WorkspaceGuard(),
+            workspaceService,
+            gitHubAuth,
+            commitService,
+            pushService,
+            diffService,
+            diffFingerprintService
+        );
+
+        CommitPushResponse response = service.commitAndPush(
+            REPO_OWNER,
+            REPO_NAME,
+            new CommitPushRequest("Update README", "The Octocat", "octocat@example.com")
+        );
+
+        assertThat(response.commitSha()).isEqualTo("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+        assertThat(workspaceEntity.getLlmDiffFingerprint()).isEqualTo(expectedFingerprint);
+        assertThat(workspaceEntity.getLlmCommitMessage()).isEqualTo("feat: cached metadata");
+        assertThat(workspaceEntity.getLlmPrTitle()).isEqualTo("Cached PR title");
+        assertThat(workspaceEntity.getLlmPrBody()).isEqualTo("Cached PR body");
+        verify(pushService).push(REPO_OWNER, REPO_NAME, workspacePath, "refactor/demo-repo-202605011830");
+        verify(diffService).diffWithoutPersist(REPO_OWNER, REPO_NAME, true, 0);
+        verify(workspaceService).saveWorkspace(workspaceEntity);
     }
 
     @Test
@@ -251,6 +323,29 @@ class CommitPushServiceTest {
             seedGit.push().setRemote("origin").add("master").call();
         }
         return remote;
+    }
+
+    private DiffResponse sampleDiff(String path, String changeType, String content) {
+        ChangedFileResponse file = new ChangedFileResponse(
+            path,
+            null,
+            changeType,
+            false,
+            false,
+            content.length(),
+            content.length(),
+            null,
+            content,
+            false
+        );
+        return new DiffResponse(
+            REPO_OWNER,
+            REPO_NAME,
+            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            OffsetDateTime.now(),
+            1,
+            List.of(file)
+        );
     }
 
     private String headOf(Path workspace) throws Exception {

@@ -230,6 +230,10 @@ public class RepositoryWorkspace {
         this.llmDiffFingerprint = diffFingerprint;
     }
 
+    public void updateLlmDiffFingerprint(String diffFingerprint) {
+        this.llmDiffFingerprint = diffFingerprint;
+    }
+
     public void invalidateLlmCache() {
         this.llmCommitMessage = null;
         this.llmPrTitle = null;

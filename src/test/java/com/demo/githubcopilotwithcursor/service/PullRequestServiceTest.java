@@ -3,6 +3,7 @@ package com.demo.githubcopilotwithcursor.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 
 class PullRequestServiceTest {
 
@@ -35,9 +37,12 @@ class PullRequestServiceTest {
         GitHubAuth gitHubAuth = mock(GitHubAuth.class);
         GitHubApiClient gitHubApiClient = mock(GitHubApiClient.class);
         DiffService diffService = mock(DiffService.class);
+        PushService pushService = mock(PushService.class);
+        WorkspaceGitStateService workspaceGitStateService = mock(WorkspaceGitStateService.class);
 
         WorkspaceService workspaceService = mock(WorkspaceService.class);
         when(workspaceService.requireContributeWorkspace(REPO_OWNER, REPO_NAME)).thenReturn(workspace);
+        when(workspaceGitStateService.hasUnpushedCommits(workspace)).thenReturn(false);
         when(gitHubAuth.githubLogin()).thenReturn("octocat");
         when(gitHubApiClient.getRepository(REPO_OWNER, REPO_NAME))
             .thenReturn(new GitHubRepository(
@@ -55,7 +60,9 @@ class PullRequestServiceTest {
             repository,
             gitHubAuth,
             gitHubApiClient,
-            diffService
+            diffService,
+            pushService,
+            workspaceGitStateService
         );
 
         PullRequestResponse response = service.createPullRequest(
@@ -79,15 +86,70 @@ class PullRequestServiceTest {
     }
 
     @Test
+    void createPullRequestPushesUnpushedBranchBeforeGitHubPrCreation() {
+        RepositoryWorkspace workspace = contributeWorkspace();
+        RepositoryWorkspaceRepository repository = mock(RepositoryWorkspaceRepository.class);
+        GitHubAuth gitHubAuth = mock(GitHubAuth.class);
+        GitHubApiClient gitHubApiClient = mock(GitHubApiClient.class);
+        DiffService diffService = mock(DiffService.class);
+        PushService pushService = mock(PushService.class);
+        WorkspaceGitStateService workspaceGitStateService = mock(WorkspaceGitStateService.class);
+
+        WorkspaceService workspaceService = mock(WorkspaceService.class);
+        when(workspaceService.requireContributeWorkspace(REPO_OWNER, REPO_NAME)).thenReturn(workspace);
+        when(workspaceGitStateService.hasUnpushedCommits(workspace)).thenReturn(true);
+        when(gitHubAuth.githubLogin()).thenReturn("octocat");
+        when(gitHubApiClient.getRepository(REPO_OWNER, REPO_NAME))
+            .thenReturn(new GitHubRepository(
+                "spring-projects/demo-repo",
+                "https://github.com/spring-projects/demo-repo",
+                "https://github.com/spring-projects/demo-repo.git",
+                "main"
+            ));
+        when(gitHubApiClient.createPullRequest(eq(REPO_OWNER), eq(REPO_NAME), any(CreatePullRequestPayload.class)))
+            .thenReturn(new GitHubPullRequest("https://github.com/spring-projects/demo-repo/pull/8", 8, "open", true, false));
+
+        PullRequestService service = new PullRequestService(
+            new WorkspaceGuard(),
+            workspaceService,
+            repository,
+            gitHubAuth,
+            gitHubApiClient,
+            diffService,
+            pushService,
+            workspaceGitStateService
+        );
+
+        service.createPullRequest(
+            REPO_OWNER,
+            REPO_NAME,
+            new PullRequestRequest("Refactor demo", "Body", null, null)
+        );
+
+        InOrder inOrder = inOrder(pushService, gitHubApiClient);
+        inOrder.verify(pushService).push(
+            eq(REPO_OWNER),
+            eq(REPO_NAME),
+            eq(java.nio.file.Path.of("C:/tmp/demo-repo")),
+            eq("refactor/demo-repo-202605041800")
+        );
+        inOrder.verify(gitHubApiClient).createPullRequest(eq(REPO_OWNER), eq(REPO_NAME), any(CreatePullRequestPayload.class));
+        verify(repository).save(workspace);
+    }
+
+    @Test
     void draftBuildsBodyFromDiffChangedFilesWithoutLlm() {
         RepositoryWorkspace workspace = contributeWorkspace();
         RepositoryWorkspaceRepository repository = mock(RepositoryWorkspaceRepository.class);
         GitHubAuth gitHubAuth = mock(GitHubAuth.class);
         GitHubApiClient gitHubApiClient = mock(GitHubApiClient.class);
         DiffService diffService = mock(DiffService.class);
+        PushService pushService = mock(PushService.class);
+        WorkspaceGitStateService workspaceGitStateService = mock(WorkspaceGitStateService.class);
 
         WorkspaceService workspaceService = mock(WorkspaceService.class);
         when(workspaceService.requireContributeWorkspace(REPO_OWNER, REPO_NAME)).thenReturn(workspace);
+        when(workspaceGitStateService.hasUnpushedCommits(workspace)).thenReturn(false);
         when(gitHubApiClient.getRepository(REPO_OWNER, REPO_NAME))
             .thenReturn(new GitHubRepository(
                 "spring-projects/demo-repo",
@@ -113,7 +175,9 @@ class PullRequestServiceTest {
             repository,
             gitHubAuth,
             gitHubApiClient,
-            diffService
+            diffService,
+            pushService,
+            workspaceGitStateService
         );
 
         PullRequestService.PullRequestDraft draft = service.draft(REPO_OWNER, REPO_NAME);

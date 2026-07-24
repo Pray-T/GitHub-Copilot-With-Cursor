@@ -14,6 +14,7 @@ import com.demo.githubcopilotwithcursor.github.GitHubPullRequest;
 import com.demo.githubcopilotwithcursor.github.GitHubRepoRef;
 import com.demo.githubcopilotwithcursor.github.GitHubRepository;
 import com.demo.githubcopilotwithcursor.repository.RepositoryWorkspaceRepository;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,8 @@ public class PullRequestService {
     private final GitHubAuth gitHubAuth;
     private final GitHubApiClient gitHubApiClient;
     private final DiffService diffService;
+    private final PushService pushService;
+    private final WorkspaceGitStateService workspaceGitStateService;
 
     public PullRequestService(
         WorkspaceGuard workspaceGuard,
@@ -35,7 +38,9 @@ public class PullRequestService {
         RepositoryWorkspaceRepository repository,
         GitHubAuth gitHubAuth,
         GitHubApiClient gitHubApiClient,
-        DiffService diffService
+        DiffService diffService,
+        PushService pushService,
+        WorkspaceGitStateService workspaceGitStateService
     ) {
         this.workspaceGuard = workspaceGuard;
         this.workspaceService = workspaceService;
@@ -43,6 +48,8 @@ public class PullRequestService {
         this.gitHubAuth = gitHubAuth;
         this.gitHubApiClient = gitHubApiClient;
         this.diffService = diffService;
+        this.pushService = pushService;
+        this.workspaceGitStateService = workspaceGitStateService;
     }
 
     @Transactional
@@ -51,6 +58,7 @@ public class PullRequestService {
         workspaceGuard.validateRepoOwner(repoOwner);
         workspaceGuard.validateRepoName(repoName);
         RepositoryWorkspace workspace = workspaceService.requireContributeWorkspace(repoOwner, repoName);
+        ensureBranchPushed(repoOwner, repoName, workspace);
         GitHubRepoRef upstream = GitHubRepoRef.fromUrl(workspace.getUpstreamUrl());
         String base = normalizeBase(request.base(), upstream);
         boolean draft = request.draft() == null || request.draft();
@@ -108,6 +116,14 @@ public class PullRequestService {
             builder.append('\n');
         }
         return builder.toString();
+    }
+
+    private void ensureBranchPushed(String repoOwner, String repoName, RepositoryWorkspace workspace) {
+        if (!workspaceGitStateService.hasUnpushedCommits(workspace)) {
+            return;
+        }
+        Path workspacePath = workspaceGuard.normalizeStoredPath(workspace.getWorkspacePath());
+        pushService.push(repoOwner, repoName, workspacePath, workspace.getBranchName());
     }
 
     private String normalizeBase(String requestedBase, GitHubRepoRef upstream) {

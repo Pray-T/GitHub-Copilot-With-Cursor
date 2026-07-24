@@ -6,6 +6,9 @@
 
 <main class="container">
 
+    <section class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></section>
+    <section class="alert alert-info" th:if="${infoMessage}" th:text="${infoMessage}"></section>
+
     <section class="card">
         <section id="agent-live-banner" class="agent-live-banner agent-live-banner-running" aria-live="polite">
             <div class="agent-live-banner-inner">

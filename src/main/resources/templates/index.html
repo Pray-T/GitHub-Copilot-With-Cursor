@@ -45,10 +45,13 @@
                 Contribute 모드 (upstream PR 생성 가능)
             </label>
             <p class="card-desc" th:if="${!githubEnabled}">
-                환경변수 <code>GITHUB_TOKEN</code>을 설정한 뒤 앱을 재시작하세요.
+                Review·Contribute 모두 fork 준비에 <code>GITHUB_TOKEN</code>이 필요합니다. 환경변수를 설정한 뒤 앱을 재시작하세요.
             </p>
             <p class="card-desc" th:if="${!cursorEnabled}">
-                환경변수 <code>CURSOR_API_KEY</code>를 설정한 뒤 앱을 재시작하세요.
+                Cloud Agent 실행에 <code>CURSOR_API_KEY</code>가 필요합니다. 환경변수를 설정한 뒤 앱을 재시작하세요.
+            </p>
+            <p class="card-desc" th:if="${!contributeEnabled}">
+                「Cloud Agent 시작」 버튼은 위 두 환경변수가 모두 설정된 경우에만 사용할 수 있습니다.
             </p>
             <section class="alert alert-info notice-panel">
                 <strong>Review 기본:</strong> fork·branch가 GitHub와 로컬에 남으며 PR은 생성하지 않습니다.
@@ -59,7 +62,7 @@
             </button>
         </form>
         <p class="card-desc">
-            「새로 시작」으로 삭제한 직후 같은 URL을 다시 시작할 때 실패하면, Cursor 등 IDE에서 이전 워크스페이스 폴더를 닫은 뒤 재시도하세요.
+            워크스페이스를 삭제한 직후 같은 URL로 다시 시작할 때 실패하면, Cursor 등 IDE에서 이전 워크스페이스 폴더를 닫은 뒤 재시도하세요.
         </p>
     </section>
 
