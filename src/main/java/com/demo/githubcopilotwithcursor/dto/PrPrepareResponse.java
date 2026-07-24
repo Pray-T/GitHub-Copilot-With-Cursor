@@ -11,7 +11,8 @@ public record PrPrepareResponse(
     OffsetDateTime cachedAt,
     boolean hasLocalUncommittedChanges,
     String nextStep,
-    boolean fallbackUsed
+    boolean fallbackUsed,
+    boolean metadataRegeneratedDueToDiffChange
 ) {
     public static final String NEXT_COMMIT_FORM = "COMMIT_FORM";
     public static final String NEXT_PR_FORM = "PR_FORM";

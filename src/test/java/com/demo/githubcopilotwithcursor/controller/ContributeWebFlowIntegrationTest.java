@@ -235,7 +235,8 @@ class ContributeWebFlowIntegrationTest {
             .andExpect(jsonPath("$.lastCommit.message").value("Refactor README"))
             .andExpect(jsonPath("$.prUrl").value("https://github.com/" + UPSTREAM_OWNER + "/" + repoName + "/pull/777"))
             .andExpect(jsonPath("$.prState").value("open"))
-            .andExpect(jsonPath("$.llmCache.hasCommitMessage").value(true));
+            .andExpect(jsonPath("$.llmCache.hasCommitMessage").value(true))
+            .andExpect(jsonPath("$.llmCache.hasFingerprint").value(true));
 
         server.verify();
     }

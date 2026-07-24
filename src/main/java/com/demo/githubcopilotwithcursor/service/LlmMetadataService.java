@@ -40,6 +40,7 @@ public class LlmMetadataService {
     private final WorkspaceService workspaceService;
     private final WorkspaceGuard workspaceGuard;
     private final DiffService diffService;
+    private final DiffFingerprintService diffFingerprintService;
     private final PullRequestService pullRequestService;
 
     public LlmMetadataService(
@@ -48,6 +49,7 @@ public class LlmMetadataService {
         WorkspaceService workspaceService,
         WorkspaceGuard workspaceGuard,
         DiffService diffService,
+        DiffFingerprintService diffFingerprintService,
         PullRequestService pullRequestService
     ) {
         this.cursorProperties = cursorProperties;
@@ -55,49 +57,86 @@ public class LlmMetadataService {
         this.workspaceService = workspaceService;
         this.workspaceGuard = workspaceGuard;
         this.diffService = diffService;
+        this.diffFingerprintService = diffFingerprintService;
         this.pullRequestService = pullRequestService;
     }
 
     @Transactional
     public PrPrepareResponse prepareForPr(String repoOwner, String repoName) {
         RepositoryWorkspace workspace = workspaceService.requireContributeWorkspace(repoOwner, repoName);
+        DiffResponse diff = diffService.diffWithoutPersist(repoOwner, repoName, true, 0);
+        String currentFingerprint = diffFingerprintService.compute(diff);
         boolean hasLocalUncommitted = hasLocalUncommittedChanges(workspace);
+        boolean hadCachedMetadata = hasCompleteCachedMetadata(workspace);
+        String previousFingerprint = workspace.getLlmDiffFingerprint();
 
-        if (isCacheValid(workspace)) {
-            return toResponse(workspace, hasLocalUncommitted, false);
+        if (isCacheValid(workspace, currentFingerprint)) {
+            return toResponse(workspace, hasLocalUncommitted, false, false);
         }
 
-        PreparedMetadata prepared = resolveComposerMetadata(repoOwner, repoName, workspace);
+        boolean metadataRegeneratedDueToDiffChange = hadCachedMetadata
+            && (previousFingerprint == null || !previousFingerprint.equals(currentFingerprint));
+
+        PreparedMetadata prepared = resolveComposerMetadata(repoOwner, repoName, workspace, diff);
         OffsetDateTime cachedAt = OffsetDateTime.now();
         workspace.cacheLlmMetadata(
             prepared.composer().commitMessage(),
             prepared.composer().prTitle(),
             prepared.composer().prBody(),
-            cachedAt
+            cachedAt,
+            currentFingerprint
         );
         workspaceService.saveWorkspace(workspace);
-        return toResponse(workspace, hasLocalUncommitted, prepared.fallbackUsed());
+        return toResponse(
+            workspace,
+            hasLocalUncommitted,
+            prepared.fallbackUsed(),
+            metadataRegeneratedDueToDiffChange
+        );
     }
 
-    public boolean isCacheValid(RepositoryWorkspace workspace) {
+    @Transactional(readOnly = true)
+    public boolean isCachedMetadataStale(RepositoryWorkspace workspace, DiffResponse diff) {
+        if (!hasCompleteCachedMetadata(workspace)) {
+            return false;
+        }
+        String storedFingerprint = workspace.getLlmDiffFingerprint();
+        if (storedFingerprint == null || storedFingerprint.isBlank()) {
+            return true;
+        }
+        return !storedFingerprint.equals(diffFingerprintService.compute(diff));
+    }
+
+    public boolean isCacheValid(RepositoryWorkspace workspace, String currentFingerprint) {
         if (workspace.getLlmCachedAt() == null) {
             return false;
         }
-        OffsetDateTime baseline = workspace.getLastDiffAt();
-        if (workspace.getAgentCompletedAt() != null) {
-            baseline = baseline == null || workspace.getAgentCompletedAt().isAfter(baseline)
-                ? workspace.getAgentCompletedAt()
-                : baseline;
+        if (workspace.getLlmDiffFingerprint() == null || workspace.getLlmDiffFingerprint().isBlank()) {
+            return false;
         }
-        if (baseline == null) {
-            baseline = workspace.getClonedAt();
+        if (!hasCompleteCachedMetadata(workspace)) {
+            return false;
         }
-        return !workspace.getLlmCachedAt().isBefore(baseline);
+        return workspace.getLlmDiffFingerprint().equals(currentFingerprint);
     }
 
-    private PreparedMetadata resolveComposerMetadata(String repoOwner, String repoName, RepositoryWorkspace workspace) {
+    private boolean hasCompleteCachedMetadata(RepositoryWorkspace workspace) {
+        return hasText(workspace.getLlmCommitMessage())
+            && hasText(workspace.getLlmPrTitle())
+            && hasText(workspace.getLlmPrBody());
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
+
+    private PreparedMetadata resolveComposerMetadata(
+        String repoOwner,
+        String repoName,
+        RepositoryWorkspace workspace,
+        DiffResponse diff
+    ) {
         try {
-            DiffResponse diff = diffService.diffWithoutPersist(repoOwner, repoName, true, 0);
             String diffPatch = buildDiffPatch(diff);
             String agentId = workspace.getCursorAgentId();
             if (agentId == null || agentId.isBlank()) {
@@ -190,7 +229,12 @@ public class LlmMetadataService {
         }
     }
 
-    private PrPrepareResponse toResponse(RepositoryWorkspace workspace, boolean hasLocalUncommitted, boolean fallbackUsed) {
+    private PrPrepareResponse toResponse(
+        RepositoryWorkspace workspace,
+        boolean hasLocalUncommitted,
+        boolean fallbackUsed,
+        boolean metadataRegeneratedDueToDiffChange
+    ) {
         String nextStep = hasLocalUncommitted ? PrPrepareResponse.NEXT_COMMIT_FORM : PrPrepareResponse.NEXT_PR_FORM;
         return new PrPrepareResponse(
             workspace.getRepoOwner(),
@@ -201,7 +245,8 @@ public class LlmMetadataService {
             workspace.getLlmCachedAt(),
             hasLocalUncommitted,
             nextStep,
-            fallbackUsed
+            fallbackUsed,
+            metadataRegeneratedDueToDiffChange
         );
     }
 

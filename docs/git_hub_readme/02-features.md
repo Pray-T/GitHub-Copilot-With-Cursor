@@ -14,7 +14,9 @@
 
 Review와 동일 + Diff에서 「PR 진행」:
 
-- `POST /api/contribute/{repoOwner}/{repoName}/pr/prepare` — repo Agent **follow-up run** 1회 (실패 시 fallback)
+- `POST /api/contribute/{repoOwner}/{repoName}/pr/prepare` — **diff fingerprint** 일치 시 DB `llm_*` 캐시 재사용; 불일치(IDE 추가 수정 등) 시 repo Agent **follow-up run** 재호출 (실패 시 fallback)
+- 동일 diff에서 「PR 진행」 재클릭 → follow-up **1회만** (cache hit). diff 변경 후 재클릭 → follow-up 재호출 + `metadataRegeneratedDueToDiffChange=true` (REST) / flash 안내 (웹)
+- `diff.html` stale 배너: 캐시 fingerprint ≠ 현재 diff 시 PR 메타가 옛 변경을 반영할 수 있음을 경고
 - uncommitted 있으면 commit 폼 → push → PR 폼
 - upstream draft PR 생성 (`PullRequestService` 단일 출구)
 

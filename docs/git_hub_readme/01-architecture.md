@@ -42,7 +42,7 @@ GitHub URL `https://github.com/{repoOwner}/{repoName}`에서 추출합니다.
 |------|--------|
 | Cursor API | `CloudAgentClient`, `CursorAuth` |
 | Agent | `AgentOrchestratorService`, `AgentSyncService` |
-| LLM | `LlmMetadataService` |
+| LLM | `LlmMetadataService`, `DiffFingerprintService` |
 | Git | `WorkspaceBootstrapService`, `DiffService`, `CommitPushService`, `PullRequestService` |
 | Web | `WorkbenchViewController` |
 

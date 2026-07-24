@@ -15,6 +15,7 @@ import com.demo.githubcopilotwithcursor.dto.WorkspaceResponse;
 import com.demo.githubcopilotwithcursor.exception.AppException;
 import com.demo.githubcopilotwithcursor.exception.ErrorCode;
 import com.demo.githubcopilotwithcursor.cursor.CursorAuth;
+import com.demo.githubcopilotwithcursor.domain.RepositoryWorkspace;
 import com.demo.githubcopilotwithcursor.domain.WorkspaceMode;
 import com.demo.githubcopilotwithcursor.github.GitHubAuth;
 import com.demo.githubcopilotwithcursor.github.GitHubRepoRef;
@@ -55,6 +56,11 @@ public class WorkbenchViewController {
     private static final Logger log = LoggerFactory.getLogger(WorkbenchViewController.class);
     private static final String REPO_SEGMENT_PATTERN = "^[A-Za-z0-9._-]+$";
     private static final String REPO_URL_FORMAT_ERROR = "GitHub 저장소 URL 형식이 올바르지 않습니다.";
+    private static final String PR_PREPARE_REGENERATED_INFO =
+        "로컬 IDE 추가 수정이 반영되어 PR 메타데이터를 새로 생성했습니다. "
+            + "이전에 생성된 커밋 메시지, PR 제목, 본문과 다를 수 있습니다.";
+    private static final String PR_PREPARE_FALLBACK_INFO =
+        "Composer 호출에 실패해 기본 PR 메타데이터를 사용합니다.";
 
     private final CloneService cloneService;
     private final DiffService diffService;
@@ -214,7 +220,14 @@ public class WorkbenchViewController {
         WorkspaceResponse workspace = workspaceService.findWorkspace(repoOwner, repoName);
         model.addAttribute("diff", viewModel);
         model.addAttribute("workspace", workspace);
-        model.addAttribute("reviewMode", "REVIEW".equalsIgnoreCase(workspace.mode()));
+        boolean reviewMode = "REVIEW".equalsIgnoreCase(workspace.mode());
+        model.addAttribute("reviewMode", reviewMode);
+        if (!reviewMode) {
+            RepositoryWorkspace entity = workspaceService.requireContributeWorkspace(repoOwner, repoName);
+            model.addAttribute("llmMetadataStale", llmMetadataService.isCachedMetadataStale(entity, diffResponse));
+        } else {
+            model.addAttribute("llmMetadataStale", false);
+        }
         return "diff";
     }
 
@@ -245,17 +258,22 @@ public class WorkbenchViewController {
     ) {
         try {
             PrPrepareResponse response = llmMetadataService.prepareForPr(repoOwner, repoName);
-            if (response.fallbackUsed()) {
-                redirectAttributes.addFlashAttribute(
-                    "infoMessage",
-                    "Composer 호출에 실패해 기본 PR 메타데이터를 사용합니다."
-                );
-            }
+            applyPrPrepareInfoFlash(response, redirectAttributes);
             String suffix = PrPrepareResponse.NEXT_COMMIT_FORM.equals(response.nextStep()) ? "/commit" : "/pr";
             return workspaceRedirect(repoOwner, repoName, suffix);
         } catch (AppException exception) {
             redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
             return workspaceRedirect(repoOwner, repoName, "/diff");
+        }
+    }
+
+    private void applyPrPrepareInfoFlash(PrPrepareResponse response, RedirectAttributes redirectAttributes) {
+        if (response.metadataRegeneratedDueToDiffChange()) {
+            redirectAttributes.addFlashAttribute("infoMessage", PR_PREPARE_REGENERATED_INFO);
+            return;
+        }
+        if (response.fallbackUsed()) {
+            redirectAttributes.addFlashAttribute("infoMessage", PR_PREPARE_FALLBACK_INFO);
         }
     }
 

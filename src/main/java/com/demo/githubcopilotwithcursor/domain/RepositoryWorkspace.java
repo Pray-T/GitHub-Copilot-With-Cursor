@@ -110,6 +110,9 @@ public class RepositoryWorkspace {
     @Column(name = "llm_cached_at")
     private OffsetDateTime llmCachedAt;
 
+    @Column(name = "llm_diff_fingerprint", length = 64)
+    private String llmDiffFingerprint;
+
     protected RepositoryWorkspace() {
     }
 
@@ -213,11 +216,18 @@ public class RepositoryWorkspace {
         this.status = WorkspaceStatus.AGENT_FAILED;
     }
 
-    public void cacheLlmMetadata(String commitMessage, String prTitle, String prBody, OffsetDateTime cachedAt) {
+    public void cacheLlmMetadata(
+        String commitMessage,
+        String prTitle,
+        String prBody,
+        OffsetDateTime cachedAt,
+        String diffFingerprint
+    ) {
         this.llmCommitMessage = commitMessage;
         this.llmPrTitle = prTitle;
         this.llmPrBody = prBody;
         this.llmCachedAt = cachedAt;
+        this.llmDiffFingerprint = diffFingerprint;
     }
 
     public void invalidateLlmCache() {
@@ -225,6 +235,7 @@ public class RepositoryWorkspace {
         this.llmPrTitle = null;
         this.llmPrBody = null;
         this.llmCachedAt = null;
+        this.llmDiffFingerprint = null;
     }
 
     public void attachPullRequest(String prUrl) {
@@ -354,6 +365,10 @@ public class RepositoryWorkspace {
 
     public OffsetDateTime getLlmCachedAt() {
         return llmCachedAt;
+    }
+
+    public String getLlmDiffFingerprint() {
+        return llmDiffFingerprint;
     }
 
     public boolean isContributeMode() {

@@ -68,7 +68,8 @@ public class ContributeStatusService {
             workspace.getLlmCachedAt(),
             hasText(workspace.getLlmCommitMessage()),
             hasText(workspace.getLlmPrTitle()),
-            hasText(workspace.getLlmPrBody())
+            hasText(workspace.getLlmPrBody()),
+            hasText(workspace.getLlmDiffFingerprint())
         );
     }
 

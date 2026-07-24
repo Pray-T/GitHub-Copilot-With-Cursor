@@ -57,7 +57,9 @@ public record ContributeStatusResponse(
         @Schema(description = "prTitle 캐시 존재")
         boolean hasPrTitle,
         @Schema(description = "prBody 캐시 존재")
-        boolean hasPrBody
+        boolean hasPrBody,
+        @Schema(description = "diff fingerprint 캐시 존재")
+        boolean hasFingerprint
     ) {
     }
 }
