@@ -1,6 +1,8 @@
-# 5. 문제 해결 (v3)
+# 4. 문제 해결 (v3)
 
-> 포트폴리오 README [상세 문서](../../README.md#상세-문서)의 5번 보완 페이지입니다.
+← [메인 README로 돌아가기](../../README.md) · [상세 문서 목록](../../README.md#상세-문서)
+
+> 포트폴리오 README [상세 문서](../../README.md#상세-문서)의 4번 보완 페이지입니다.
 
 ## 시작 버튼 disabled
 
@@ -12,7 +14,7 @@ Cursor Dashboard에서 GitHub repo 연결 확인.
 
 ## Composer fallback (`fallbackUsed=true`)
 
-- timeout: `app.cursor.composer.timeout-ms` 상향 ([4. 실행 가이드](04-getting-started.md))
+- timeout: `app.cursor.composer.timeout-ms` 상향 (예: `bootRun --args="--app.cursor.composer.timeout-ms=180000 --app.cursor.composer.max-files=10"`)
 - fallback 사용 시에도 PR 흐름은 정상 진행
 
 ## 재클론 / CLONE_FAILED
