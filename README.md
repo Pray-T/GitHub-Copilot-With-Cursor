@@ -1,3 +1,7 @@
+## 또 다른 포트폴리오:<br>
+[이체시스템의 구현을 통한 MySQL의 정합성과 인덱스](https://github.com/Pray-T/BankTranferSys_Backend_Restful.git) <br>
+[AWS에 배포하여 운영했던 JWT+Redis 이중 토큰 인증과 실시간 채팅등을 갖춘 웹 앱.](https://github.com/Pray-T/ReadyPlz-Production_main.git)
+
 # GitHub Copilot With Cursor
 
 **GitHub URL + 자연어 프롬프트** → Cursor Cloud Agent가 fork branch에 코드를 수정 → Spring Boot가 pull·Diff·(선택) PR까지 처리하는 **Cloud-first 리포지토리 워크벤치**입니다.
