@@ -17,8 +17,8 @@ Review와 동일 + Diff에서 「PR 진행」:
 - `POST /api/contribute/{repoOwner}/{repoName}/pr/prepare` — **diff fingerprint** 일치 시 DB `llm_*` 캐시 재사용; 불일치(IDE 추가 수정 등) 시 repo Agent **follow-up run** 재호출 (실패 시 fallback)
 - 동일 diff에서 「PR 진행」 재클릭 → follow-up **1회만** (cache hit). diff 변경 후 재클릭 → follow-up 재호출 + `metadataRegeneratedDueToDiffChange=true` (REST) / flash 안내 (웹)
 - `diff.html` stale 배너: 캐시 fingerprint ≠ 현재 diff 시 PR 메타가 옛 변경을 반영할 수 있음을 경고
-- uncommitted 있으면 commit 폼 → push → PR 폼
-- upstream draft PR 생성 (`PullRequestService` 단일 출구)
+- uncommitted 있으면 commit 폼 → push → PR 폼 (`WorkspaceGitStateService.hasUncommittedChanges`)
+- upstream draft PR 생성 (`PullRequestService` 단일 출구). **PR 생성 직전** 로컬 branch에 origin 미반영 commit이 있으면 `ensureBranchPushed`가 **no-force push** 후 PR 생성 (FR-8.6)
 
 ## REST API 요약
 
@@ -46,6 +46,7 @@ Review와 동일 + Diff에서 「PR 진행」:
 | GET | `/`, `/web` | index (워크스페이스 목록) |
 | POST | `/web/clone` | Review/Contribute 시작 |
 | GET | `/web/workspaces/{repoOwner}/{repoName}/wait` | Agent 대기 |
+| POST | `/web/workspaces/{repoOwner}/{repoName}/agent/cancel` | Agent 취소 (wait 화면) |
 | GET | `/web/workspaces/{repoOwner}/{repoName}/diff` | Diff 화면 |
 | POST | `/web/workspaces/{repoOwner}/{repoName}/launch-ide` | IDE 실행 |
 | POST | `/web/workspaces/{repoOwner}/{repoName}/pr/prepare` | PR 메타 준비 |

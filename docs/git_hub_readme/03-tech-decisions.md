@@ -9,6 +9,12 @@
 - Contribute PR 메타: repo Agent(`cursor_agent_id`)에 **follow-up run** (`POST /v1/agents/{id}/runs`)
 - no-repo `runComposer` 경로: **제거됨** (follow-up 전환)
 
+## JGit 워크스페이스 상태 (`WorkspaceGitStateService`, v3.0.5)
+
+- `hasUncommittedChanges()` — JGit `git.status()` working tree 비-clean 여부. `LlmMetadataService`·`WorkbenchViewController`(PR 흐름 가드)가 공유
+- `hasUnpushedCommits()` — local `refs/heads/{branch}` vs `refs/remotes/origin/{branch}` SHA 비교. remote ref 없으면 unpushed로 간주
+- `PullRequestService.ensureBranchPushed` — PR API 호출 직전 unpushed면 `PushService.push()` **no-force** 선행 (head remote 미반영 시 PR 공백/실패 방지). force push 금지 유지
+
 ## PR 메타 캐시 (content-aware)
 
 - `DiffFingerprintService`: `DiffResponse` → SHA-256 hex (`headCommitSha`, 파일 수, path 정렬별 path/changeType/size/content hash)

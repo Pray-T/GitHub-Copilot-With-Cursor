@@ -25,7 +25,7 @@ GitHub Copilot Coding Agent처럼 *"프롬프트만 주면 에이전트가 알�
 * **1인 풀스택으로 설계·구현** — 기획, 백엔드, 화면(Thymeleaf), 테스트 전 과정을 단독 진행했습니다.
 * Cursor Cloud Agents API 연동(`CloudAgentClient`), 에이전트 상태 폴링·동기화, JGit 기반 Git 자동화(fork·branch·pull·Diff·commit·PR), 토큰 마스킹 등 **핵심 연동 로직을 직접 작성**했습니다.
 * 이 애플리케이션은 *"에이전트로 코드를 고치는 도구"*이지만, **애플리케이션 자체의 코드와 아키텍처는 제가 직접 설계·구현**한 것입니다.
-* **테스트 88개**(단위 + `PrMetadataFingerprintIntegrationTest`·`ContributeWebFlowIntegrationTest` 등 E2E·통합 포함)로 Review/Contribute·PR 메타 fingerprint 캐시 흐름을 검증합니다.
+* **테스트 92개**(단위 + `PrMetadataFingerprintIntegrationTest`·`ContributeWebFlowIntegrationTest` 등 E2E·통합 포함)로 Review/Contribute·PR 메타 fingerprint 캐시 흐름을 검증합니다.
 
 <br>
 
@@ -83,6 +83,7 @@ Review·Contribute 모드, Agent wait 폴링, Diff 확인, 로컬 IDE 추가 수
 * Composer 2.5 Fast(`fast=true`) 모델 고정 및 `autoCreatePR=false` 정책
 * Agent push 후 Spring `fetch`/`pull --ff-only` 기반 Diff
 * PR 메타 생성을 repo Agent **follow-up run**으로 처리하고, **diff fingerprint**로 캐시 hit/miss 판정(IDE 추가 수정 시 자동 재생성)
+* `WorkspaceGitStateService`로 uncommitted/unpushed JGit 상태 판정 · PR 생성 직전 **no-force push** (`ensureBranchPushed`, FR-8.6)
 * Flyway V7 `llm_diff_fingerprint`, 토큰 마스킹(`AuthorizationMaskingInterceptor`) 등
 
 ## [4.문제 해결](./docs/git_hub_readme/04-troubleshooting.md)

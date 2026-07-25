@@ -51,7 +51,7 @@ IDE가 `.git` pack 파일을 잠그면 폴더 삭제 실패. Cursor에서 워크
 Contribute에서 IDE 「추가 수정」 후 **「PR 진행」·「커밋+Push」 없이** PR 페이지(`/pr`) 또는 「PR 만들기」만 누르면 **Diff 화면으로 redirect**되며 flash 오류가 표시됩니다.
 
 - **원인 1 (미커밋):** IDE에서 저장한 변경이 아직 커밋되지 않았습니다. flash: `PR_FLOW_UNCOMMITTED_CHANGES`.
-- **원인 2 (stale 메타):** IDE 수정 후 「PR 진행」을 다시 누르지 않아 PR 메타(`llm_*`) fingerprint가 현재 diff와 불일치합니다. flash: `PR_FLOW_STALE_METADATA`. diff 화면 **stale 경고 배너**도 동일 정책(v3.0.4 fingerprint).
+- **원인 2 (stale 메타):** IDE 수정 후 「PR 진행」을 다시 누르지 않아 PR 메타(`llm_*`) fingerprint가 현재 diff와 불일치합니다. flash: `PR_FLOW_STALE_METADATA`. diff 화면 **stale 경고 배너**도 동일 정책(v3.0.4 fingerprint, v3.0.5 `WorkspaceGitStateService` 가드).
 
 **올바른 순서:**
 
@@ -61,3 +61,4 @@ Diff → [추가 수정] → IDE 저장 → [변경 확인] → [PR 진행] → 
 
 - IDE 복귀 직후 「변경 확인」만으로 PR 메타는 갱신되지 않습니다. **「PR 진행」을 다시 클릭**해야 Composer follow-up이 최신 diff를 반영합니다.
 - commit-push 후 fingerprint가 post-commit 상태로 동기화되므로, 위 순서를 따르면 PR 페이지 직행이 허용됩니다.
+- **참고 (v3.0.5):** commit-push를 건너뛰고 PR 생성만 시도해도, 로컬에 unpushed commit이 남아 있으면 `PullRequestService.ensureBranchPushed`가 PR 직전 **no-force push**를 시도합니다. 다만 uncommitted·stale 메타 가드는 그대로이므로 위 순서를 따르는 것이 안전합니다.

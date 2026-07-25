@@ -43,8 +43,9 @@ GitHub URL `https://github.com/{repoOwner}/{repoName}`에서 추출합니다.
 | Cursor API | `CloudAgentClient`, `CursorAuth` |
 | Agent | `AgentOrchestratorService`, `AgentSyncService` |
 | LLM | `LlmMetadataService`, `DiffFingerprintService` |
+| Git 상태 | `WorkspaceGitStateService` (`hasUncommittedChanges` / `hasUnpushedCommits`) |
 | Git | `WorkspaceBootstrapService`, `DiffService`, `CommitPushService`, `PullRequestService` |
-| Web | `WorkbenchViewController` |
+| Web | `WorkbenchViewController` (PR 흐름 uncommitted/stale 가드) |
 
 ## 패키지 구조
 
@@ -60,7 +61,7 @@ Contribute에서 uncommitted 변경이 없으면 `commit` 단계를 건너뛸 �
 
 로컬 실행 기준 실제 UI 캡처입니다.
 
-![메인 화면 — 워크스페이스 목록](../images/index.png) ../images/index.png
+![메인 화면 — 워크스페이스 목록](../images/index.png)
 
 ![Agent 대기 화면](../images/wait.png)
 

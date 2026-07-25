@@ -30,6 +30,9 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.URIish;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -289,6 +292,57 @@ class PrMetadataFingerprintIntegrationTest {
     }
 
     @Test
+    void apiCreatePrPushesLocalOnlyCommitBeforeGitHubPullRequest() throws Exception {
+        bootstrapContributeWorkspace();
+        Path workspacePath = WORKSPACE_ROOT.resolve(UPSTREAM_OWNER).resolve(repoName);
+        Files.writeString(workspacePath.resolve("README.md"), "# Demo\n\nLocal commit only change\n");
+
+        expectPrMetadataFollowUp(
+            "run-meta-local-only",
+            "feat: local only metadata",
+            "Local only PR title",
+            "local only"
+        );
+
+        mockMvc.perform(post("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/pr/prepare"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/web/workspaces/" + UPSTREAM_OWNER + "/" + repoName + "/commit"));
+        server.verify();
+        server.reset();
+
+        RepositoryWorkspace workspace = repository.findByRepoOwnerAndRepoName(UPSTREAM_OWNER, repoName).orElseThrow();
+        String branchName = workspace.getBranchName();
+        try (Git git = Git.open(workspacePath.toFile())) {
+            git.add().addFilepattern("README.md").call();
+            git.commit()
+                .setMessage("Manual local commit")
+                .setAuthor("The Octocat", "octocat@example.com")
+                .call();
+        }
+
+        String localBeforePr = branchSha(workspacePath, branchName);
+        assertThat(remoteBranchSha(branchName)).isNotEqualTo(localBeforePr);
+
+        expectSuccessfulPullRequest();
+
+        mockMvc.perform(post("/api/contribute/" + UPSTREAM_OWNER + "/" + repoName + "/pull-request")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "title": "Local only PR title",
+                      "body": "## 변경 요약\\n\\nlocal-only commit",
+                      "base": "master",
+                      "draft": true
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.prUrl").value("https://github.com/" + UPSTREAM_OWNER + "/" + repoName + "/pull/902"));
+
+        assertThat(remoteBranchSha(branchName)).isEqualTo(localBeforePr);
+        server.verify();
+    }
+
+    @Test
     void apiPrepareExposesRegenerationFlagAfterIdeEdit() throws Exception {
         bootstrapContributeWorkspace();
         Path workspacePath = WORKSPACE_ROOT.resolve(UPSTREAM_OWNER).resolve(repoName);
@@ -359,6 +413,19 @@ class PrMetadataFingerprintIntegrationTest {
                 }
                 """.formatted(UPSTREAM_OWNER, repoName, UPSTREAM_OWNER, repoName, UPSTREAM_OWNER, repoName),
                 MediaType.APPLICATION_JSON));
+    }
+
+    private void expectSuccessfulPullRequest() {
+        server.expect(requestTo("https://api.github.com/repos/" + UPSTREAM_OWNER + "/" + repoName + "/pulls"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withSuccess("""
+                {
+                  "html_url": "https://github.com/%s/%s/pull/902",
+                  "number": 902,
+                  "state": "open",
+                  "draft": true
+                }
+                """.formatted(UPSTREAM_OWNER, repoName), MediaType.APPLICATION_JSON));
     }
 
     private void expectContributeStartForkFlow() {
@@ -447,6 +514,20 @@ class PrMetadataFingerprintIntegrationTest {
             seedGit.push().setRemote("origin").add("master").call();
         }
         return bare;
+    }
+
+    private String branchSha(Path workspacePath, String branchName) throws Exception {
+        try (Git git = Git.open(workspacePath.toFile())) {
+            ObjectId objectId = git.getRepository().resolve("refs/heads/" + branchName);
+            return objectId != null ? objectId.name() : null;
+        }
+    }
+
+    private String remoteBranchSha(String branchName) throws Exception {
+        try (Repository repository = new FileRepositoryBuilder().setGitDir(remote.toFile()).build()) {
+            ObjectId objectId = repository.resolve("refs/heads/" + branchName);
+            return objectId != null ? objectId.name() : null;
+        }
     }
 
     private void cleanupWorkspace() {
