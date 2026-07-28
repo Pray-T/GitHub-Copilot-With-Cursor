@@ -6,6 +6,22 @@ GitHub Copilot Coding Agent와 유사한 **리포지토리 에이전트 워크�
 
 <br>
 
+## 인사말
+
+안녕하세요. 시간을 내어 방문해 주셔서 감사합니다.  
+팀과 시너지를 내면서도, 혼자 깊게 고민하며 성장하는 개발자가 되고자 합니다.  
+
+## Profile
+
+* **프로젝트명** : GitHub Copilot With Cursor (Cloud-first Workbench)
+* **한 줄 요약** : Browser → Spring Boot(:8080) → Cursor Cloud Agents API + GitHub API + JGit + MySQL
+* **기술 스택** : `Java 17`, `Spring Boot 4`, `Thymeleaf`, `JPA`, `Flyway`, `MySQL`, `JGit`, `Cursor Cloud Agents API`, `GitHub REST API`
+* **운영 모드** : **Review** (Diff·로컬 보관, PR 없음) · **Contribute** (commit + upstream PR)
+## 다른 포트폴리오
+
+- [은행 이체 REST API — MySQL 동시성 정합성과 Redis 멱등성/스로틀을 중심으로 구현한 백엔드 포트폴리오입니다.](https://github.com/Pray-T/BankTransferSys_Backend_Restful.git)
+- [AWS에 배포·운영한 JWT+Redis 이중 토큰 인증과 실시간 채팅 웹 앱](https://github.com/Pray-T/ReadyPlz-Production_main.git)
+
 ## 왜 만들었나
 
 GitHub Copilot Coding Agent처럼 *"프롬프트만 주면 에이전트가 알아서 브랜치를 만들고 코드를 고쳐 PR을 올리는"* 워크플로를, Node/Python SDK 브릿지 없이 **Cursor Cloud Agents API를 Spring Boot에서 직접 호출**해 재현해보고 싶었습니다.
@@ -22,18 +38,6 @@ GitHub Copilot Coding Agent처럼 *"프롬프트만 주면 에이전트가 알�
 * Cursor Cloud Agents API 연동(`CloudAgentClient`), 에이전트 상태 폴링·동기화, JGit 기반 Git 자동화(fork·branch·pull·Diff·commit·PR), 토큰 마스킹 등 **핵심 연동 로직을 직접 작성**했습니다.
 * 이 애플리케이션은 *"에이전트로 코드를 고치는 도구"*이지만, **애플리케이션 자체의 코드와 아키텍처는 제가 직접 설계·구현**한 것입니다.
 * **테스트 92개**(단위 + `PrMetadataFingerprintIntegrationTest`·`ContributeWebFlowIntegrationTest` 등 E2E·통합 포함)로 Review/Contribute·PR 메타 fingerprint 캐시 흐름을 검증합니다.
-
-<br>
-
-## Profile
-
-* **프로젝트명** : GitHub Copilot With Cursor (Cloud-first Workbench)
-* **한 줄 요약** : Browser → Spring Boot(:8080) → Cursor Cloud Agents API + GitHub API + JGit + MySQL
-* **기술 스택** : `Java 17`, `Spring Boot 4`, `Thymeleaf`, `JPA`, `Flyway`, `MySQL`, `JGit`, `Cursor Cloud Agents API`, `GitHub REST API`
-* **운영 모드** : **Review** (Diff·로컬 보관, PR 없음) · **Contribute** (commit + upstream PR)
-
-<br>
-
 ## 빠른 시작
 
 ### 사전 요구
@@ -57,11 +61,6 @@ $env:CURSOR_API_KEY = "key_..."
 → http://localhost:8080 · [Swagger UI](http://localhost:8080/swagger-ui.html)
 
 <br>
-
----
-
-<br>
-
 ## 상세 문서
 
 *아래 링크를 클릭하시면 해당 상세 페이지로 이동합니다.*
