@@ -1,6 +1,6 @@
 # 4. 문제 해결
 
-← [메인 README로 돌아가기](../../README.md)
+[메인 README로 돌아가기](../../README.md)
 
 ## 시작 버튼
 
