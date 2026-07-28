@@ -1,10 +1,8 @@
-# 4. 문제 해결 (v3)
+# 4. 문제 해결
 
-← [메인 README로 돌아가기](../../README.md) · [상세 문서 목록](../../README.md#상세-문서)
+← [메인 README로 돌아가기](../../README.md)
 
-> 포트폴리오 README [상세 문서](../../README.md#상세-문서)의 4번 보완 페이지입니다.
-
-## 시작 버튼 disabled
+## 시작 버튼
 
 `GITHUB_TOKEN`과 `CURSOR_API_KEY` 둘 다 필요. 설정 후 앱 재기동.
 
