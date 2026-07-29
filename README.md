@@ -1,26 +1,27 @@
 # GitHub Copilot With Cursor
-
-**GitHub URL + 자연어 프롬프트** → Cursor Cloud Agent가 fork branch에 코드를 수정 → Spring Boot가 pull·Diff·(선택) PR까지 처리하는 **Cloud-first 리포지토리 워크벤치**입니다.
-
-GitHub Copilot Coding Agent와 유사한 **리포지토리 에이전트 워크플로**를, **Cursor Cloud Agents API**와 **Spring Boot**로 직접 구현한 풀스택 포트폴리오 프로젝트입니다.
-
+**긍정적으로 일하고 세상에 도움이 되는 사람이 되자.**
 <br>
+<br>
+안녕하세요 먼저 귀한 시간을 내어 저의 깃허브에 방문해 주신 것에 감사드립니다.<br/>
+저는 팀의 일원으로서 팀원들과 함께 좋은 에너지를 만들며 일하고 싶고, 동시에 혼자 고민하는 시간을 통해 전문가로서의 역량을 기르고자 하고 적은 비용으로 어떻게 하면 많은 효과를 누릴 수 있을까? 하고 생각하는 개발자입니다.
+<br>
+<br>
+이 프로젝트는 "GitHub Copilot Coding Agent"와 유사한 **리포지토리 에이전트 워크플로**를, **Cursor Cloud Agents API**와 **Spring Boot**로 직접 구현한 풀스택 포트폴리오 프로젝트입니다. <br><br>
+**한줄 소개:** **GitHub URL + 자연어 프롬프트** → Cursor Cloud Agent가 fork branch에 코드를 수정 → Spring Boot가 pull·Diff·(선택) PR까지 처리하는 **Cloud-first 리포지토리 워크벤치**입니다.
 
-## 인사말
+## 기술 스택
 
-안녕하세요. 시간을 내어 방문해 주셔서 감사합니다.  
-팀과 시너지를 내면서도, 혼자 깊게 고민하며 성장하는 개발자가 되고자 합니다.  
+| 구분 | 기술 |
+|------|------|
+| Language | Java 17 |
+| Framework | Spring Boot 4 |
+| ORM | Spring Data JPA (Hibernate) |
+| Database | MYSQL |
+| ~~ | Flyway |
+| ~~ | JGit |
 
-## Profile
-
-* **프로젝트명** : GitHub Copilot With Cursor (Cloud-first Workbench)
-* **한 줄 요약** : Browser → Spring Boot(:8080) → Cursor Cloud Agents API + GitHub API + JGit + MySQL
-* **기술 스택** : `Java 17`, `Spring Boot 4`, `Thymeleaf`, `JPA`, `Flyway`, `MySQL`, `JGit`, `Cursor Cloud Agents API`, `GitHub REST API`
 * **운영 모드** : **Review** (Diff·로컬 보관, PR 없음) · **Contribute** (commit + upstream PR)
-## 다른 포트폴리오
 
-- [은행 이체 REST API — MySQL 동시성 정합성과 Redis 멱등성/스로틀을 중심으로 구현한 백엔드 포트폴리오입니다.](https://github.com/Pray-T/BankTransferSys_Backend_Restful)
-- [AWS에 배포·운영한 JWT+Redis 이중 토큰 인증과 실시간 채팅 웹 앱](https://github.com/Pray-T/ReadyPlz-Production_main)
 
 ## 왜 만들었나
 
@@ -32,12 +33,6 @@ GitHub Copilot Coding Agent처럼 *"프롬프트만 주면 에이전트가 알�
 * **Git 자동화** — JGit 기반 fork·branch·pull·Diff·commit·upstream PR
 * **운영 관심사** — 토큰 보안(마스킹), DB 마이그레이션, 워크스페이스 정리 스케줄러
 
-## 내가 한 일
-
-* **1인 풀스택으로 설계·구현** — 기획, 백엔드, 화면(Thymeleaf), 테스트 전 과정을 단독 진행했습니다.
-* Cursor Cloud Agents API 연동(`CloudAgentClient`), 에이전트 상태 폴링·동기화, JGit 기반 Git 자동화(fork·branch·pull·Diff·commit·PR), 토큰 마스킹 등 **핵심 연동 로직을 직접 작성**했습니다.
-* 이 애플리케이션은 *"에이전트로 코드를 고치는 도구"*이지만, **애플리케이션 자체의 코드와 아키텍처는 제가 직접 설계·구현**한 것입니다.
-* **테스트 92개**(단위 + `PrMetadataFingerprintIntegrationTest`·`ContributeWebFlowIntegrationTest` 등 E2E·통합 포함)로 Review/Contribute·PR 메타 fingerprint 캐시 흐름을 검증합니다.
 ## 빠른 시작
 
 ### 사전 요구
@@ -91,4 +86,9 @@ Review·Contribute 모드, Agent wait 폴링, Diff 확인, 로컬 IDE 추가 수
 
 <br>
 
-*이상입니다. 저장소 방문에 감사드립니다.*
+## 다른 포트폴리오
+
+- [은행 이체 REST API를 통해 MySQL 동시성 정합성과 Redis 멱등성/스로틀을 중심으로 구현, 대량 데이터 인덱스 조회 실험 검증](https://github.com/Pray-T/BankTransferSys_Backend_Restful) 
+- [AWS에 배포·운영한 JWT+Redis 이중 토큰 인증과 실시간 채팅 웹 앱](https://github.com/Pray-T/ReadyPlz-Production_main)
+
+**이상입니다, 저의 깃허브 방문을 감사드립니다.**
