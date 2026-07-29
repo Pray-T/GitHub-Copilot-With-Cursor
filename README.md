@@ -19,8 +19,8 @@ GitHub Copilot Coding Agent와 유사한 **리포지토리 에이전트 워크�
 * **운영 모드** : **Review** (Diff·로컬 보관, PR 없음) · **Contribute** (commit + upstream PR)
 ## 다른 포트폴리오
 
-- [은행 이체 REST API — MySQL 동시성 정합성과 Redis 멱등성/스로틀을 중심으로 구현한 백엔드 포트폴리오입니다.](https://github.com/Pray-T/BankTransferSys_Backend_Restful.git)
-- [AWS에 배포·운영한 JWT+Redis 이중 토큰 인증과 실시간 채팅 웹 앱](https://github.com/Pray-T/ReadyPlz-Production_main.git)
+- [은행 이체 REST API — MySQL 동시성 정합성과 Redis 멱등성/스로틀을 중심으로 구현한 백엔드 포트폴리오입니다.](https://github.com/Pray-T/BankTransferSys_Backend_Restful)
+- [AWS에 배포·운영한 JWT+Redis 이중 토큰 인증과 실시간 채팅 웹 앱](https://github.com/Pray-T/ReadyPlz-Production_main)
 
 ## 왜 만들었나
 
