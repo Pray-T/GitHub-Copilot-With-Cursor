@@ -9,6 +9,13 @@
 이 프로젝트는 "GitHub Copilot Coding Agent"와 유사한 **리포지토리 에이전트 워크플로**를, **Cursor Cloud Agents API**와 **Spring Boot**로 직접 구현한 풀스택 포트폴리오 프로젝트입니다. <br><br>
 **한줄 소개:** **GitHub URL + 자연어 프롬프트** → Cursor Cloud Agent가 fork branch에 코드를 수정 → Spring Boot가 pull·Diff·(선택) PR까지 처리하는 **Cloud-first 리포지토리 워크벤치**입니다.
 
+### 성과 · 규모 하이라이트
+
+* **운영 모드 2종** — Review(Diff·로컬 보관) · Contribute(commit + upstream PR)
+* **단위·통합 테스트 약 90개** — 테스트 클래스 30여 개 (`MockMvc` E2E·서비스·GitHub/Cursor 클라이언트)
+* **Flyway 마이그레이션 7단계** — V1 초기 스키마 ~ V7 `llm_diff_fingerprint` 캐시
+* **외부 API 직접 연동** — Cursor Cloud Agents · GitHub REST를 Spring `RestClient`로 호출 (SDK 브릿지 없음)
+
 ## 기술 스택
 
 | 구분 | 기술 |
