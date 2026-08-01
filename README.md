@@ -14,11 +14,17 @@
 | 구분 | 기술 |
 |------|------|
 | Language | Java 17 |
-| Framework | Spring Boot 4 |
+| Build | Gradle |
+| Framework | Spring Boot 4 (WebMVC) |
+| View | Thymeleaf + static CSS |
 | ORM | Spring Data JPA (Hibernate) |
-| Database | MYSQL |
-| ~~ | Flyway |
-| ~~ | JGit |
+| Database | MySQL 8 |
+| Migration | Flyway |
+| Git | JGit |
+| Diff | java-diff-utils |
+| External API | Cursor Cloud Agents API · GitHub REST API (`RestClient`) |
+| API Docs | springdoc-openapi (Swagger UI) |
+| Monitoring | Spring Boot Actuator |
 
 * **운영 모드** : **Review** (Diff·로컬 보관, PR 없음) · **Contribute** (commit + upstream PR)
 
