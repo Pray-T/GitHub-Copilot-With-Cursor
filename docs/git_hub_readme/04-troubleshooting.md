@@ -2,14 +2,6 @@
 
 [메인 README로 돌아가기](../../README.md)
 
-## 시작 버튼
-
-`GITHUB_TOKEN`과 `CURSOR_API_KEY` 둘 다 필요. 설정 후 앱 재기동.
-
-## Agent 400 / branch validation
-
-Cursor Dashboard에서 GitHub repo 연결 확인.
-
 ## PR 메타 stale 배너 (`diff.html`)
 
 IDE 「추가 수정」 후 diff 내용이 바뀌었는데 이전에 「PR 진행」으로 생성한 PR 메타(`llm_*`)가 남아 있으면 diff 화면에 **경고 배너**가 표시됩니다.
@@ -27,9 +19,8 @@ IDE 「추가 수정」 후 diff 내용이 바뀌었는데 이전에 「PR 진�
 
 IDE가 `.git` pack 파일을 잠그면 폴더 삭제 실패. Cursor에서 워크스페이스 닫고 재시도.
 
-## MySQL / Flyway
+## Flyway
 
-- **`Access denied`**: `DB_USERNAME`/`DB_PASSWORD` 확인
 - **Migration 실패 이력**: `FlywayConfig`가 failed migration 감지 시 `repair()` 후 `migrate()` 자동 실행
 
 ## repoOwner / repoName 불일치
@@ -39,10 +30,6 @@ IDE가 `.git` pack 파일을 잠그면 폴더 삭제 실패. Cursor에서 워크
 ## GitHub side effect (워크스페이스 삭제)
 
 로컬 DB·디스크만 정리. fork·branch·PR은 GitHub에 잔존 — 수동 정리.
-
-## Windows JGit pack lock (테스트)
-
-통합 테스트 cleanup WARN은 알려진 flake.
 
 ## 「PR 만들기」 직행 시 diff로 돌아감
 
