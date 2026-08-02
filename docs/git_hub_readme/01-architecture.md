@@ -31,8 +31,8 @@ sequenceDiagram
 
 GitHub URL `https://github.com/{repoOwner}/{repoName}`에서 추출합니다.
 
-- API·Web 경로는 **`/{repoOwner}/{repoName}` 2-segment**가 표준 (Flyway V4 이후)
-- 동일 repoName이라도 owner가 다르면 별도 워크스페이스
+- API·Web 경로는 2-segment가 표준입니다. 다음과 같이 묶습니다. `/{repoOwner}/{repoName}` 
+- 동일 repoName이라도 owner가 다르면 별도 워크스페이스로 취급합니다.
 
 예: `https://github.com/octocat/Hello-World` → `repoOwner=octocat`, `repoName=Hello-World`
 
