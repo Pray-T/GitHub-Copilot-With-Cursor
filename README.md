@@ -85,7 +85,7 @@ Review·Contribute 모드, Agent wait 폴링, Diff 확인, 로컬 IDE 추가 수
 
 ## [4.문제 해결](./docs/git_hub_readme/04-troubleshooting.md)
 
-시작 버튼 disabled, Agent 400 validation, Composer fallback, 재클론 실패, MySQL/Flyway 오류, GitHub 잔존 리소스.
+Composer fallback, 재클론 실패, Flyway 오류, GitHub 잔존 리소스.
 
 <br>
 
