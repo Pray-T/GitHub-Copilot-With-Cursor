@@ -21,17 +21,13 @@
 | 구분 | 기술 |
 |------|------|
 | Language | Java 17 |
-| Build | Gradle |
-| Framework | Spring Boot 4 (WebMVC) |
-| View | Thymeleaf + static CSS |
+| Framework | Spring Boot 4 |
 | ORM | Spring Data JPA (Hibernate) |
-| Database | MySQL 8 |
+| Database | MySQL |
 | Migration | Flyway |
 | Git | JGit |
-| Diff | java-diff-utils |
 | External API | Cursor Cloud Agents API · GitHub REST API (`RestClient`) |
 | API Docs | springdoc-openapi (Swagger UI) |
-| Monitoring | Spring Boot Actuator |
 
 ## 왜 만들었나
 
@@ -66,6 +62,7 @@ $env:CURSOR_API_KEY = "key_..."
 → http://localhost:8080 · [Swagger UI](http://localhost:8080/swagger-ui.html)
 
 <br>
+
 ## 상세 문서
 
 *아래 링크를 클릭하시면 해당 상세 페이지로 이동합니다.*
