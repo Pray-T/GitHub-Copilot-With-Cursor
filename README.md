@@ -33,9 +33,6 @@
 | API Docs | springdoc-openapi (Swagger UI) |
 | Monitoring | Spring Boot Actuator |
 
-* **운영 모드** : **Review** (Diff·로컬 보관, PR 없음) · **Contribute** (commit + upstream PR)
-
-
 ## 왜 만들었나
 
 GitHub Copilot Coding Agent처럼 *"프롬프트만 주면 에이전트가 알아서 브랜치를 만들고 코드를 고쳐 PR을 올리는"* 워크플로를, Node/Python SDK 브릿지 없이 **Cursor Cloud Agents API를 Spring Boot에서 직접 호출**해 재현해보고 싶었습니다.

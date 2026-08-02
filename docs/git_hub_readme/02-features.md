@@ -8,7 +8,7 @@
 2. fork·feature branch·remote push 준비
 3. Cursor Cloud Agent 실행 (`composer-2.5` Fast, `autoCreatePR=false`)
 4. wait 화면 5초 폴링 → 완료 시 sync → Diff
-5. 「Review 종료(보관)」 또는 「추가 수정」(로컬 `cursor` CLI IDE)
+5. 「홈으로」(워크스페이스 유지) 또는 「추가 수정」(로컬 `cursor` CLI → wait → 「변경 확인」→ Diff)
 
 ## Contribute 모드
 
