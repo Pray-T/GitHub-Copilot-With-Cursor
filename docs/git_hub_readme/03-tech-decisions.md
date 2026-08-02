@@ -5,11 +5,11 @@
 ## Cursor Cloud Agent
 
 - `CloudAgentClient.startAgent`: **`autoCreatePR=false` LOCKED**
-- repo Agent 모델: **`composer-2.5` + `fast=true`(Composer 2.5 Fast) 코드 상수 고정**
+- repo Agent 모델: **`composer-2.5` + `fast=true`(Composer 2.5 Fast)**
 - Contribute PR 메타: repo Agent(`cursor_agent_id`)에 **follow-up run** (`POST /v1/agents/{id}/runs`)
-- no-repo `runComposer` 경로: **제거됨** (follow-up 전환)
 
-## JGit 워크스페이스 상태 (`WorkspaceGitStateService`, v3.0.5)
+
+## JGit 워크스페이스 상태 (`WorkspaceGitStateService`)
 
 - `hasUncommittedChanges()` — JGit `git.status()` working tree 비-clean 여부. `LlmMetadataService`·`WorkbenchViewController`(PR 흐름 가드)가 공유
 - `hasUnpushedCommits()` — local `refs/heads/{branch}` vs `refs/remotes/origin/{branch}` SHA 비교. remote ref 없으면 unpushed로 간주
@@ -31,7 +31,7 @@
 
 ## Diff
 
-- 기준: clone 시점 `headCommitSha` vs working tree
+- 기준: clone 시점 `headCommitSha`(기준 커밋)과  working tree를 비교
 - 크기 제한: `app.workspace.diff.max-file-bytes` (1MB), `max-total-bytes` (50MB)
 
 ## 워크스페이스 정리
