@@ -6,7 +6,8 @@
 
 - `CloudAgentClient.startAgent`: **`autoCreatePR=false` LOCKED**
 - repo Agent 모델: **`composer-2.5` + `fast=true`(Composer 2.5 Fast)**
-- Contribute PR 메타: repo Agent(`cursor_agent_id`)에 **follow-up run** (`POST /v1/agents/{id}/runs`)
+- Contribute PR 메타: repo Agent(`cursor_agent_id`)에 **follow-up** (`POST /v1/agents/{id}/runs`).  <br>예전에는 코드 수정 Agent와 별개의 Agent가 PR 제목·본문을 써서 환각증세가 발생할 수가 있었다.
+지금은 코드를 고친 같은 Agent에 follow-up을 보내고, PR 입력에서는 원래 프롬프트를 제거하여 환각 증세를 방지한다.
 
 
 ## JGit 워크스페이스 상태 (`WorkspaceGitStateService`)

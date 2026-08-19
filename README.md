@@ -79,7 +79,8 @@ Review·Contribute 모드, Agent wait 폴링, Diff 확인, 로컬 IDE 추가 수
 
 * Composer 2.5 Fast(`fast=true`) 모델 고정 및 `autoCreatePR=false` 정책
 * Agent push 후 Spring `fetch`/`pull --ff-only` 기반 Diff
-* PR 메타 생성을 repo Agent **follow-up run**으로 처리하고, **diff fingerprint**로 캐시 hit/miss 판정(IDE 추가 수정 시 자동 재생성)
+* PR 메타: 코드 수정에 사용했던 같은 Agent에 **follow-up**을 보내 작성한다. 새로운 Agent가 PR메타를 작성하여 환각 증세를 방지하기 위함입니다.
+* PR 메타 캐시: **diff fingerprint**로 hit/miss 판정 (IDE 추가 수정 시 재생성)
 * `WorkspaceGitStateService`로 uncommitted/unpushed JGit 상태 판정 · PR 생성 직전 **no-force push** (`ensureBranchPushed`, FR-8.6)
 * Flyway V7 `llm_diff_fingerprint`, 토큰 마스킹(`AuthorizationMaskingInterceptor`) 등
 
