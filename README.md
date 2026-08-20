@@ -21,11 +21,23 @@ Browser → Spring Boot → Cursor Cloud Agent · GitHub · MySQL. Contribute �
 
 ![흐름 — Browser에서 Spring Boot를 거쳐 Cursor Agent · GitHub · MySQL로 이어지는 시퀀스](./docs/images/readme-architecture.png)
 
+### Agent 대기 화면
+
+Cloud Agent가 fork 브랜치에서 작업하는 동안 5초 간격으로 상태를 폴링합니다. 실제로 사용된 fork URL · 작업 브랜치 · 로컬 경로를 사전 고지와 함께 보여줍니다.
+
+![Agent 대기 화면 — Cursor Agent RUNNING 상태 폴링, fork URL · 작업 브랜치 · 로컬 경로 고지](./docs/images/wait.png)
+
 ### Diff 화면
 
 클론 직후 HEAD와 현재 Working Tree를 비교합니다. 파일 행을 펼치면 추가·삭제 줄을 확인할 수 있습니다.
 
-![Diff 화면 — README.md 변경을 펼친 원본 HEAD와 Working Tree 비교](./docs/images/readme-diff-expanded.png)
+![Diff 화면 — BookReserveResponseDTO.java의 Lombok 클래스 → Java 17 record 변경을 펼친 원본 HEAD와 Working Tree 비교](./docs/images/readme-diff-expanded.png)
+
+### PR 작성 화면 (Contribute)
+
+Diff 확인 후 「PR 진행」을 누르면 Composer가 커밋 메시지 · PR 제목 · 본문을 한 번 생성해 폼을 채웁니다. upstream PR 생성은 이 화면의 「PR 만들기」로만 이뤄집니다.
+
+![PR 작성 화면 — Composer가 채운 PR 제목·본문, Base Branch, Draft PR 옵션](./docs/images/pr.png)
 
 ### 성과 · 규모 하이라이트
 

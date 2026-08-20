@@ -61,10 +61,14 @@ Contribute에서 uncommitted 변경이 없으면 `commit` 단계를 건너뛸 �
 
 로컬 실행 기준 실제 UI 캡처입니다.
 
-![메인 화면 — 워크스페이스 목록](../images/index.png)
+![메인 화면 — URL·프롬프트 입력과 활성 워크스페이스 목록(REVIEW·CONTRIBUTE)](../images/index.png)
 
-![Agent 대기 화면](../images/wait.png)
+![Agent 대기 화면 — Agent RUNNING 폴링, fork URL·작업 브랜치·로컬 경로 고지](../images/wait.png)
 
-![Diff 화면](../images/diff.png)
+![Diff 화면 — Contribute 워크스페이스의 Java 변경 파일 행과 「PR 진행」](../images/diff.png)
 
-![PR 화면](../images/pr.png)
+![Diff 화면 (Review) — 「PR 진행」 없이 「홈으로」만 제공](../images/diff-review.png)
+
+![커밋 & Push 화면 — Composer가 생성한 커밋 메시지와 작성자 정보](../images/commit.png)
+
+![PR 화면 — Composer가 채운 PR 제목·본문과 Draft 옵션](../images/pr.png)
