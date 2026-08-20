@@ -9,6 +9,24 @@
 이 프로젝트는 "GitHub Copilot Coding Agent"와 유사한 **리포지토리 에이전트 워크플로**를, **Cursor Cloud Agents API**와 **Spring Boot**로 직접 구현한 풀스택 포트폴리오 프로젝트입니다. <br><br>
 **한줄 소개:** **GitHub URL + 자연어 프롬프트** → Cursor Cloud Agent가 fork branch에 코드를 수정 → Spring Boot가 pull·Diff·(선택) PR까지 처리하는 **Cloud-first 리포지토리 워크벤치**입니다.
 
+### 메인 화면
+
+GitHub URL과 Agent 프롬프트를 입력하고, 활성 워크스페이스 상태를 확인합니다.
+
+![메인 화면 — GitHub URL과 Agent 프롬프트 입력, 활성 워크스페이스 목록](./docs/images/readme-hero-index.png)
+
+### 흐름
+
+Browser → Spring Boot → Cursor Cloud Agent · GitHub · MySQL. Contribute 모드만 Diff 이후 commit → PR로 이어집니다.
+
+![흐름 — Browser에서 Spring Boot를 거쳐 Cursor Agent · GitHub · MySQL로 이어지는 시퀀스](./docs/images/readme-architecture.png)
+
+### Diff 화면
+
+클론 직후 HEAD와 현재 Working Tree를 비교합니다. 파일 행을 펼치면 추가·삭제 줄을 확인할 수 있습니다.
+
+![Diff 화면 — README.md 변경을 펼친 원본 HEAD와 Working Tree 비교](./docs/images/readme-diff-expanded.png)
+
 ### 성과 · 규모 하이라이트
 
 * **운영 모드 2종** — Review(Diff·로컬 보관) · Contribute(commit + upstream PR)
