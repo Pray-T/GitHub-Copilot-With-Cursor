@@ -100,19 +100,10 @@
                     <tr th:each="row : ${file.rows}"
                         th:class="'row-' + ${#strings.toLowerCase(row.tag)}">
                         <td class="num" th:text="${row.oldLineNumber}">1</td>
-                        <td class="text-cell">
-                            <span th:if="${row.oldText != null and !#strings.isEmpty(row.oldText)}"
-                                  th:text="${row.oldText}">old line</span>
-                            <span th:if="${row.oldText == null or #strings.isEmpty(row.oldText)}"
-                                  class="diff-empty-line">&nbsp;</span>
-                        </td>
+                        <!--/* text-cell은 white-space: pre-wrap이므로 태그 사이 공백·개행이 코드로 렌더된다. 한 줄로 유지할 것. */-->
+                        <td class="text-cell"><span th:if="${row.oldText != null and !#strings.isEmpty(row.oldText)}" th:text="${row.oldText}">old line</span><span th:if="${row.oldText == null or #strings.isEmpty(row.oldText)}" class="diff-empty-line">&nbsp;</span></td>
                         <td class="num" th:text="${row.newLineNumber}">1</td>
-                        <td class="text-cell">
-                            <span th:if="${row.newText != null and !#strings.isEmpty(row.newText)}"
-                                  th:text="${row.newText}">new line</span>
-                            <span th:if="${row.newText == null or #strings.isEmpty(row.newText)}"
-                                  class="diff-empty-line">&nbsp;</span>
-                        </td>
+                        <td class="text-cell"><span th:if="${row.newText != null and !#strings.isEmpty(row.newText)}" th:text="${row.newText}">new line</span><span th:if="${row.newText == null or #strings.isEmpty(row.newText)}" class="diff-empty-line">&nbsp;</span></td>
                     </tr>
                 </tbody>
             </table>
