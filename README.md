@@ -125,16 +125,16 @@ $env:CURSOR_API_KEY = "key_..."
 
 위 화면과 기동 방법은 **이 앱이 무엇을 하는지**입니다. 이 절은 **이 저장소를 여러 에이전트가 어떻게 협력하여 만들었는지**입니다.
 
-에이전트는 세션이 끝나면 이전 대화를 공유하지 않습니다. 그래서 [`.cursorrules`](./.cursorrules)에 역할과 금지를 적고, 기획 문서에 무엇을 만들지 고정하고, [`STATUS.md`](./STATUS.md)에 지금 어디까지인지를 남깁니다. 파일을 고치고 명령을 실행하는 것은 Cursor가 합니다. 문서는 세션이 바뀌어도 기획·구현·테스트 에이전트가 **같은 규칙과 같은 인수인계**를 보게 합니다.
+에이전트는 세션이 끝나면 이전 대화를 공유하지 않습니다. 그래서 `.cursorrules`에 역할과 금지를 적고, 기획 문서에 무엇을 만들지 고정하고, `STATUS.md`에 지금 어디까지인지를 남깁니다. 파일을 고치고 명령을 실행하는 것은 Cursor가 합니다. 문서는 세션이 바뀌어도 기획·구현·테스트 에이전트가 **같은 규칙과 같은 인수인계**를 보게 합니다.
 
 **작업 체인:** `@AgentA`(기획) → `@AgentC`(구현) → `@AgentB`(통합 테스트·디버깅)
 
 | 산출물 | 하는 일 |
 |--------|---------|
-| [`.cursorrules`](./.cursorrules) | 역할·권한·금지·작업 체인. 사용자만 수정 |
-| [`docs/PRD.md`](./docs/PRD.md) · [`API_SPEC.md`](./docs/API_SPEC.md) · [`DB_SCHEMA.md`](./docs/DB_SCHEMA.md) | 매 세션에 다시 읽는 사전지식. 구현·테스트의 정본 |
-| [`TECH_SPEC.md`](./TECH_SPEC.md) | 기획과 코드가 어긋날 때의 실제 설계 기록 |
-| [`STATUS.md`](./STATUS.md) Append-only | 세션을 넘기는 공유 상태·인수인계 |
+| `.cursorrules` | 역할·권한·금지·작업 체인. 사용자만 수정 |
+| `docs/PRD.md` · `API_SPEC.md` · `DB_SCHEMA.md` | 매 세션에 다시 읽는 사전지식. 구현·테스트의 정본 |
+| `TECH_SPEC.md` | 기획과 코드가 어긋날 때의 실제 설계 기록 |
+| `STATUS.md` Append-only | 세션을 넘기는 공유 상태·인수인계 |
 
 
 자세한 권한·인수인계 규칙은 [5. 에이전트 협력 방식](./docs/git_hub_readme/05-agent-collaboration.md)에서 이어서 읽으실 수 있습니다.

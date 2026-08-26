@@ -4,7 +4,7 @@
 
 ## 한 줄 요약
 
-에이전트는 세션이 끝나면 이전 대화를 공유하지 않습니다. 이 저장소는 [`.cursorrules`](../../.cursorrules) · 기획 정본 · [`STATUS.md`](../../STATUS.md)로 규칙과 인수인계를 남기고, `@AgentA`(기획) → `@AgentC`(구현) → `@AgentB`(통합 테스트·디버깅)로 역할을 나눴습니다. 에이전트가 서로를 직접 부르지 못하게 하고, **문서가 그 자리를 대신합니다.**
+에이전트는 세션이 끝나면 이전 대화를 공유하지 않습니다. 이 저장소는 `.cursorrules` · 기획 정본 · `STATUS.md`로 규칙과 인수인계를 남기고, `@AgentA`(기획) → `@AgentC`(구현) → `@AgentB`(통합 테스트·디버깅)로 역할을 나눴습니다. 에이전트가 서로를 직접 부르지 못하게 하고, **문서가 그 자리를 대신합니다.**
 
 ## 이 문서가 다루는 것
 
@@ -51,64 +51,64 @@ flowchart TB
 
 | 산출물 | 하는 일 |
 |--------|---------|
-| [`.cursorrules`](../../.cursorrules) | 역할·권한·금지·작업 체인. 가이드와 강제 규칙. **사용자만 수정** |
-| [`docs/PRD.md`](../PRD.md) | 무엇을 만들지. 제품 요구사항 |
-| [`docs/API_SPEC.md`](../API_SPEC.md) | HTTP 계약 |
-| [`docs/DB_SCHEMA.md`](../DB_SCHEMA.md) | 데이터 계약 |
+| `.cursorrules` | 역할·권한·금지·작업 체인. 가이드와 강제 규칙. **사용자만 수정** |
+| `docs/PRD.md` | 무엇을 만들지. 제품 요구사항 |
+| `docs/API_SPEC.md` | HTTP 계약 |
+| `docs/DB_SCHEMA.md` | 데이터 계약 |
 | 위 기획 3종 | 매 세션에 다시 읽는 사전지식. 구현·테스트의 **Single Source of Truth**(정본) |
-| [`TECH_SPEC.md`](../../TECH_SPEC.md) | 기획과 코드가 어긋날 때의 실제 설계 기록. 기획을 고치지 않고 Append |
-| [`STATUS.md`](../../STATUS.md) Append-only | 세션을 넘기는 공유 상태·인수인계 게시판 |
+| `TECH_SPEC.md` | 기획과 코드가 어긋날 때의 실제 설계 기록. 기획을 고치지 않고 Append |
+| `STATUS.md` Append-only | 세션을 넘기는 공유 상태·인수인계 게시판 |
 | `@AgentA` → `@AgentC` → `@AgentB` + 모델 고정 | 역할 분담과 작업 순서 |
 | force push 금지, 토큰 마스킹, `autoCreatePR=false`, docs 수정 금지 등 | 에이전트에게 적어 둔 금지 사항 |
 | `@AgentB`의 `./gradlew test` | 테스트 결과를 보고 고치는 검증의 **일부**. 모든 규칙을 자동으로 검사하지는 않음 |
 
 한 줄로 줄이면 다음과 같습니다.
 
-- [`.cursorrules`](../../.cursorrules) = 팀 규약
+- `.cursorrules` = 팀 규약
 - `docs` 기획 3종 = 기획 정본
-- [`TECH_SPEC.md`](../../TECH_SPEC.md) = 구현 메모
-- [`STATUS.md`](../../STATUS.md) = 인수인계 게시판
+- `TECH_SPEC.md` = 구현 메모
+- `STATUS.md` = 인수인계 게시판
 
 `docs/git_hub_readme/`(이 파일 포함)는 기획 정본이 아닙니다. GitHub 방문자를 위한 제품·협력 설명입니다.
 
 ## 읽기·쓰기 권한
 
-권한의 정본은 [`.cursorrules`](../../.cursorrules)입니다. 아래는 그 파일을 표로 옮긴 것입니다.
+권한의 정본은 `.cursorrules`입니다. 아래는 그 파일을 표로 옮긴 것입니다.
 
 | 파일 | 읽기 | 쓰기 |
 |------|------|------|
-| [`.cursorrules`](../../.cursorrules) | 모든 에이전트 필독 | **사용자만.** `@AgentA`/`@AgentB`/`@AgentC` 수정 금지 |
-| [`docs/PRD.md`](../PRD.md), [`API_SPEC.md`](../API_SPEC.md), [`DB_SCHEMA.md`](../DB_SCHEMA.md) | 구현·테스트의 Single Source of Truth | **`@AgentA`만.** B/C는 Read-Only |
-| [`TECH_SPEC.md`](../../TECH_SPEC.md) | `@AgentC` 필독, `@AgentB` 필독 | **`@AgentC` 주 관리.** `@AgentB`는 테스트·운영 Append. `@AgentA`는 코드·`.cursorrules`·TECH_SPEC **작성/수정 금지** |
-| [`STATUS.md`](../../STATUS.md) | 모든 에이전트, **작업 시작 시 최우선** | 모든 에이전트 **Append만.** 덮어쓰기·삭제 금지 |
+| `.cursorrules` | 모든 에이전트 필독 | **사용자만.** `@AgentA`/`@AgentB`/`@AgentC` 수정 금지 |
+| `docs/PRD.md`, `API_SPEC.md`, `DB_SCHEMA.md` | 구현·테스트의 Single Source of Truth | **`@AgentA`만.** B/C는 Read-Only |
+| `TECH_SPEC.md` | `@AgentC` 필독, `@AgentB` 필독 | **`@AgentC` 주 관리.** `@AgentB`는 테스트·운영 Append. `@AgentA`는 코드·`.cursorrules`·TECH_SPEC **작성/수정 금지** |
+| `STATUS.md` | 모든 에이전트, **작업 시작 시 최우선** | 모든 에이전트 **Append만.** 덮어쓰기·삭제 금지 |
 | 애플리케이션 코드 · 테스트 | `@AgentC` 구현, `@AgentB` 테스트·최소 수정 | `@AgentA` 금지. `@AgentB`는 v3 **신규 기능 구현 담당 아님** |
 
 `@AgentA`의 `/docs/` 권한은 기획 3종 작성입니다. `/docs/` 외에는 `STATUS.md` Append만 허용됩니다.
 
-구현·테스트의 정본(Single Source of Truth)은 `@AgentA`가 쓴 기획 3종입니다. 기획과 코드가 다르면 [`TECH_SPEC.md`](../../TECH_SPEC.md)에 이유를 남기고, **지금 어디인지는 [`STATUS.md`](../../STATUS.md) 맨 아래**를 봅니다.
+구현·테스트의 정본(Single Source of Truth)은 `@AgentA`가 쓴 기획 3종입니다. 기획과 코드가 다르면 `TECH_SPEC.md`에 이유를 남기고, **지금 어디인지는 `STATUS.md` 맨 아래**를 봅니다.
 
 ## 필독 순서
 
-[`.cursorrules`](../../.cursorrules)에 적힌 순서입니다.
+`.cursorrules`에 적힌 순서입니다.
 
 `@AgentC` (구현 시작):
 
-1. [`STATUS.md`](../../STATUS.md) — 최신 `@AgentA` 인수인계
+1. `STATUS.md` — 최신 `@AgentA` 인수인계
 2. `/docs/` 기획 3종
-3. [`TECH_SPEC.md`](../../TECH_SPEC.md)
+3. `TECH_SPEC.md`
 4. [`README.md`](../../README.md)
 
 `@AgentB` (테스트·디버깅 시작):
 
-1. [`STATUS.md`](../../STATUS.md) — 최신 `@AgentC` 인수인계
+1. `STATUS.md` — 최신 `@AgentC` 인수인계
 2. `/docs/` 기획 3종
-3. [`TECH_SPEC.md`](../../TECH_SPEC.md)
+3. `TECH_SPEC.md`
 
-기획을 구현할 수 없으면 `@AgentC`는 `docs/`를 고치지 않고 [`TECH_SPEC.md`](../../TECH_SPEC.md)에 **사유와 함께 Append**합니다. `@AgentB`가 기획 변경이 필요하다고 보면 `docs/`를 직접 고치지 않고 [`STATUS.md`](../../STATUS.md)에 `@AgentA` 갱신 요청을 남깁니다.
+기획을 구현할 수 없으면 `@AgentC`는 `docs/`를 고치지 않고 `TECH_SPEC.md`에 **사유와 함께 Append**합니다. `@AgentB`가 기획 변경이 필요하다고 보면 `docs/`를 직접 고치지 않고 `STATUS.md`에 `@AgentA` 갱신 요청을 남깁니다.
 
 ## 역할과 작업 체인
 
-모델·역할도 [`.cursorrules`](../../.cursorrules)가 정본입니다.
+모델·역할도 `.cursorrules`가 정본입니다.
 
 ```mermaid
 flowchart LR
@@ -128,7 +128,7 @@ flowchart LR
 ### `@AgentA` 수석 기획자 (Claude Opus 4.8 전용)
 
 - 요구사항·시나리오·API·DB·화면 흐름을 기획합니다.
-- 산출물: [`docs/PRD.md`](../PRD.md), [`API_SPEC.md`](../API_SPEC.md), [`DB_SCHEMA.md`](../DB_SCHEMA.md).
+- 산출물: `docs/PRD.md`, `API_SPEC.md`, `DB_SCHEMA.md`.
 - 코드·`.cursorrules`·`TECH_SPEC.md` **작성/수정 금지**.
 - 기획 완료/변경 시 `STATUS.md` **Append만**, 인수인계 대상은 `@AgentC`.
 
@@ -154,9 +154,9 @@ flowchart LR
 
 ## 인수인계 규칙 (Handoff Protocol)
 
-[`.cursorrules`](../../.cursorrules) 「인수인계 및 상태 관리」와 같습니다.
+`.cursorrules` 「인수인계 및 상태 관리」와 같습니다.
 
-1. **동기화:** 작업 시작 시 [`STATUS.md`](../../STATUS.md) 최우선.
+1. **동기화:** 작업 시작 시 `STATUS.md` 최우선.
 2. **Append-only:** 덮어쓰기·삭제 금지.
 3. **작업 체인:** `@AgentA` → `@AgentC` → `@AgentB`.
 4. **기재 포맷:**
@@ -188,7 +188,7 @@ flowchart LR
 
 ## 강제 규칙 예시
 
-[`.cursorrules`](../../.cursorrules) 공통 금지(`@AgentC`·`@AgentB`)와 역할 금지를 제품 정책과 같은 방향으로 묶습니다. 코드가 막는 것과, **에이전트에게 읽히도록 적어 둔 제약**을 구분합니다.
+`.cursorrules` 공통 금지(`@AgentC`·`@AgentB`)와 역할 금지를 제품 정책과 같은 방향으로 묶습니다. 코드가 막는 것과, **에이전트에게 읽히도록 적어 둔 제약**을 구분합니다.
 
 | 제약 | 어디에 적혀 있는가 | 의도 |
 |------|-------------------|------|
