@@ -17,8 +17,10 @@
 
 **한줄 소개:** **GitHub URL + 자연어 프롬프트** → Cursor Cloud Agent가 fork branch에 코드를 수정 → Spring Boot가 pull·Diff·(선택) PR까지 처리하는 **Cloud-first 리포지토리 워크벤치**입니다.
 
+## 화면
+
 <details>
-<summary><strong>화면 스크린샷</strong> — 클릭하면 메인·흐름·대기·Diff·PR 화면이 펼쳐집니다</summary>
+<summary> 클릭하면 메인·흐름·대기·Diff·PR 화면이 펼쳐집니다</summary>
 
 ### 메인 화면
 
