@@ -68,16 +68,48 @@ Diff 확인 후 「PR 진행」을 누르면 Composer가 커밋 메시지 · PR 
 ## 기술 스택
 
 
-| 구분           | 기술                                                       |
-| ------------ | -------------------------------------------------------- |
-| Language     | Java 17                                                  |
-| Framework    | Spring Boot 4                                            |
-| ORM          | Spring Data JPA (Hibernate)                              |
-| Database     | MySQL                                                    |
-| Migration    | Flyway                                                   |
-| Git          | JGit                                                     |
-| External API | Cursor Cloud Agents API · GitHub REST API (`RestClient`) |
-| API Docs     | springdoc-openapi (Swagger UI)                           |
+<table>
+<thead>
+<tr>
+<th align="left">구분</th>
+<th align="left">기술</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>Java 17</td>
+</tr>
+<tr>
+<td>Framework</td>
+<td>Spring Boot 4</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td>Spring Data JPA (Hibernate)</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>MySQL</td>
+</tr>
+<tr>
+<td>Migration</td>
+<td>Flyway</td>
+</tr>
+<tr>
+<td>Git</td>
+<td>JGit</td>
+</tr>
+<tr>
+<td>External API</td>
+<td>Cursor Cloud Agents API · GitHub REST API (<code>RestClient</code>)</td>
+</tr>
+<tr>
+<td>API Docs</td>
+<td>springdoc-openapi <details><summary><abbr title="클릭하면 실제 기동한 Swagger UI 스크린샷이 펼쳐집니다">(Swagger UI)</abbr></summary><p>실제로 기동한 Swagger UI입니다. springdoc-openapi가 <code>/v3/api-docs</code>를 읽어 렌더링합니다.</p><img src="./docs/images/readme-swagger-ui.png" alt="Swagger UI — Cursor Agent와 Workspace REST API" /></details></td>
+</tr>
+</tbody>
+</table>
 
 
 
