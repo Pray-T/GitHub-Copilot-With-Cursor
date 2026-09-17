@@ -24,8 +24,9 @@ Review와 동일 + Diff에서 「PR 진행」:
 
 | Method | Path | 용도 |
 |--------|------|------|
-| POST | `/api/contribute/start` | Contribute 워크스페이스 시작 (v3 주 경로) |
-| POST | `/api/agents/start` | 기존 workspace Agent 재시작 |
+| POST | `/api/clone` | v3 주 경로: Review/Contribute 시작 (`agentPrompt` + `mode=REVIEW\|CONTRIBUTE`) |
+| POST | `/api/contribute/start` | v2 레거시/하위호환·테스트용 (`repoUrl`만, 웹 UI 미사용). 내부는 `/api/clone`과 동일 bootstrap+Agent 시작 |
+| POST | `/api/agents/start` | 기존 workspace Agent 재시작 (신규 워크스페이스 생성 아님) |
 | GET | `/api/agents/{repoOwner}/{repoName}/status` | Agent 상태 폴링 |
 | POST | `/api/agents/{repoOwner}/{repoName}/cancel` | Agent 취소 |
 | POST | `/api/agents/{repoOwner}/{repoName}/sync` | Agent 완료 후 fetch/pull·Diff 준비 |
@@ -37,7 +38,6 @@ Review와 동일 + Diff에서 「PR 진행」:
 | GET | `/api/workspaces` | 워크스페이스 목록 |
 | POST | `/api/workspaces/{repoOwner}/{repoName}/launch-ide` | IDE 실행 (REST) |
 | DELETE | `/api/workspaces/{repoOwner}/{repoName}` | 로컬 DB·디스크 삭제 |
-| POST | `/api/clone` | Legacy v1 클론 API |
 
 ## Web UI 경로
 
