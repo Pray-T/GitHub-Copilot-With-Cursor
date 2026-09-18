@@ -50,6 +50,7 @@ class CloudAgentClientTest {
         server.expect(requestTo("https://api.cursor.test/v1/agents"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer cursor-secret-key"))
+            .andExpect(header("X-Client", "github-copilot-with-cursor/v3.0.5"))
             .andExpect(content().string(containsString("\"model\":{\"id\":\"composer-2.5\",\"params\":[{\"id\":\"fast\",\"value\":\"true\"}]}")))
             .andExpect(content().string(containsString("\"autoCreatePR\":false")))
             .andRespond(withSuccess("""
@@ -78,6 +79,7 @@ class CloudAgentClientTest {
 
         assertThat(response.agentId()).isEqualTo("bc-test-001");
         assertThat(response.runId()).isEqualTo("run-test-001");
+        assertThat(properties.getClientName()).isEqualTo("github-copilot-with-cursor/v3.0.5");
         assertThat(CloudAgentClient.AUTO_CREATE_PR).isFalse();
         assertThat(CloudAgentClient.LOCKED_MODEL_ID).isEqualTo("composer-2.5");
         assertThat(CloudAgentClient.LOCKED_MODEL_FAST_VALUE).isEqualTo("true");

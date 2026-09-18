@@ -13,7 +13,7 @@ public class CursorProperties {
 
     private String apiKey = "";
 
-    private String clientName = "github-copilot-with-cursor/v3.0.2";
+    private String clientName = "github-copilot-with-cursor/v3.0.5";
 
     private final Agent agent = new Agent();
 

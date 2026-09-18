@@ -9,7 +9,8 @@
 - 프론트/백 분리 없음. 단일 Spring Boot(:8080)가 Thymeleaf + `/api/*` 서빙.
 
 # 기획 문서 버전
-- **v3.0.0** (`docs/PRD.md`, `docs/API_SPEC.md`, `docs/DB_SCHEMA.md`) — @AgentA 작성. 구현·테스트의 **Single Source of Truth**.
+- **v3.0.5** (`docs/PRD.md`, `docs/API_SPEC.md`) — @AgentA 작성. 구현·테스트의 **Single Source of Truth**.
+- `docs/DB_SCHEMA.md`는 **v3.0.4** (Flyway V7까지. v3.0.5는 스키마 변경 없음).
 - v2 기획과 충돌 시 **v3 + STATUS.md 최신 @AgentA 인수인계** 우선.
 
 # 에이전트 페르소나 및 전용 모델
@@ -18,14 +19,14 @@
 
 1. [@AgentA] 수석 기획자 (Claude Opus 4.8 전용)
    - 역할: 요구사항·시나리오·API·DB·화면 흐름 기획.
-   - 산출물: `/docs/` 내 `PRD.md`, `API_SPEC.md`, `DB_SCHEMA.md` (v3.0.0).
+   - 산출물: `/docs/` 내 `PRD.md`·`API_SPEC.md` (v3.0.5), `DB_SCHEMA.md` (v3.0.4).
    - 필수 행동:
      - 코드·`.cursorrules`·`TECH_SPEC.md` **작성/수정 금지**.
      - 기획 완료/변경 시 `STATUS.md` **Append만** (인수인계: **@AgentC** 구현 P0/P1).
    - 권한: `/docs/` **작성 전용**. `/docs/` 외 파일은 STATUS Append만.
 
 2. [@AgentC] 시니어 풀스택 개발자 (Composer 2.5 전용)
-   - 역할: @AgentA **v3.0.0** 기획을 바탕으로 **v3 기능 구현** (베이스라인 v2 코드 위 **개편·확장**).
+   - 역할: @AgentA **v3.0.5** 기획을 바탕으로 **v3 기능 구현** (베이스라인 v2 코드 위 **개편·확장**).
    - 구현 범위 (LOCKED — PRD와 동일):
      - **Review (R-B):** fork 자동 생성/재사용, Agent push, pull, Diff, fork·branch **사전 고지**, PR 없음.
      - **Contribute:** fork·branch·Agent push·pull·Diff·(M1) IDE·조건부 commit·upstream PR.
@@ -80,9 +81,9 @@
 ├── gradlew / gradlew.bat
 ├── gradle/
 ├── docs/ ← @AgentA 전용 (Read-Only for B/C)
-│        ├── PRD.md ← v3.0.0 
-│        ├── API_SPEC.md 
-│        └── DB_SCHEMA.md 
+│        ├── PRD.md ← v3.0.5
+│        ├── API_SPEC.md ← v3.0.5
+│        └── DB_SCHEMA.md ← v3.0.4
 ├── STATUS.md ← Append-only 인수인계 
 ├── TECH_SPEC.md ← @AgentC 주 관리, @AgentB 테스트·운영 Append 
 ├── README.md  
