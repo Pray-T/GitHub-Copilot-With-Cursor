@@ -43,9 +43,13 @@ public class WorkspaceController {
 
     @PostMapping("/workspaces/{repoOwner}/{repoName}/launch-ide")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @Operation(summary = "로컬 IDE 실행 (M1)", description = "Diff 확인 후 추가 수정이 필요할 때 Cursor IDE를 비동기로 실행합니다.")
-    @ApiResponse(responseCode = "202", description = "IDE 실행 요청 수락")
-    @ApiResponse(responseCode = "502", description = "IDE 실행 실패", content = @Content(schema = @Schema(implementation = com.demo.githubcopilotwithcursor.dto.ErrorResponse.class)))
+    @Operation(
+        summary = "로컬 IDE 실행 (M1)",
+        description = "Diff 확인 후 추가 수정이 필요할 때 Cursor IDE를 비동기로 실행합니다. "
+            + "202는 요청 수락이며, 실제 성공/실패는 이후 워크스페이스 status(IDE_LAUNCHED 또는 IDE_LAUNCH_FAILED)에 반영됩니다."
+    )
+    @ApiResponse(responseCode = "202", description = "IDE 실행 요청 수락. ideLaunchPending=true는 수락이지 IDE가 열렸다는 뜻이 아님")
+    @ApiResponse(responseCode = "404", description = "워크스페이스 없음", content = @Content(schema = @Schema(implementation = com.demo.githubcopilotwithcursor.dto.ErrorResponse.class)))
     public LaunchIdeResponse launchIde(
         @PathVariable("repoOwner") @Pattern(regexp = "^[A-Za-z0-9._-]+$") String repoOwner,
         @PathVariable("repoName") @Pattern(regexp = "^[A-Za-z0-9._-]+$") String repoName

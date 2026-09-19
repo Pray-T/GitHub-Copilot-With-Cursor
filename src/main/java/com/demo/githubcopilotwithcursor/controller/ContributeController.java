@@ -55,11 +55,16 @@ public class ContributeController {
     }
 
     @PostMapping("/start")
-    @Operation(summary = "Contribute 워크스페이스 시작", description = "upstream 저장소를 fork 재사용/생성하고 clone, feature branch 생성, Cursor IDE 실행까지 한 번에 수행합니다.")
+    @Operation(
+        summary = "Contribute 워크스페이스 시작 (v2 호환)",
+        description = "upstream 저장소를 fork 재사용/생성하고 clone한 뒤 feature branch를 origin에 push하고 Cursor Cloud Agent를 시작합니다. "
+            + "로컬 IDE는 이 경로에서 실행하지 않습니다. 웹 UI의 주 진입점은 POST /web/clone 또는 POST /api/clone 입니다."
+    )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Contribute 시작 성공"),
-        @ApiResponse(responseCode = "401", description = "GITHUB_TOKEN 미설정", content = @Content(schema = @Schema(implementation = com.demo.githubcopilotwithcursor.dto.ErrorResponse.class))),
-        @ApiResponse(responseCode = "502", description = "fork 생성 또는 GitHub API 호출 실패", content = @Content(schema = @Schema(implementation = com.demo.githubcopilotwithcursor.dto.ErrorResponse.class)))
+        @ApiResponse(responseCode = "200", description = "Contribute 시작 성공 (Cloud Agent 시작까지)"),
+        @ApiResponse(responseCode = "401", description = "GITHUB_TOKEN 또는 CURSOR_API_KEY 미설정", content = @Content(schema = @Schema(implementation = com.demo.githubcopilotwithcursor.dto.ErrorResponse.class))),
+        @ApiResponse(responseCode = "409", description = "워크스페이스가 이미 있거나 Agent가 실행 중", content = @Content(schema = @Schema(implementation = com.demo.githubcopilotwithcursor.dto.ErrorResponse.class))),
+        @ApiResponse(responseCode = "502", description = "fork·clone·push 또는 Cloud Agent 시작 실패", content = @Content(schema = @Schema(implementation = com.demo.githubcopilotwithcursor.dto.ErrorResponse.class)))
     })
     public ResponseEntity<ContributeStartResponse> start(@Valid @RequestBody ContributeStartRequest request) {
         return ResponseEntity.ok(contributeService.start(request));
