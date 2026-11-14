@@ -32,7 +32,6 @@ import com.demo.githubcopilotwithcursor.service.WorkspaceGuard;
 import com.demo.githubcopilotwithcursor.service.WorkspaceService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +54,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class WorkbenchViewController {
 
     private static final Logger log = LoggerFactory.getLogger(WorkbenchViewController.class);
-    private static final String REPO_SEGMENT_PATTERN = "^[A-Za-z0-9._-]+$";
     private static final String REPO_URL_FORMAT_ERROR = "GitHub 저장소 URL 형식이 올바르지 않습니다.";
     private static final String PR_PREPARE_REGENERATED_INFO =
         "로컬 IDE 추가 수정이 반영되어 PR 메타데이터를 새로 생성했습니다. "
@@ -199,8 +197,8 @@ public class WorkbenchViewController {
 
     @GetMapping("/web/workspaces/{repoOwner}/{repoName}/wait")
     public String wait(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         Model model
     ) {
         WorkspaceResponse workspace = workspaceService.findWorkspace(repoOwner, repoName);
@@ -211,8 +209,8 @@ public class WorkbenchViewController {
 
     @PostMapping("/web/workspaces/{repoOwner}/{repoName}/agent/cancel")
     public String cancelAgent(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         RedirectAttributes redirectAttributes
     ) {
         try {
@@ -226,8 +224,8 @@ public class WorkbenchViewController {
 
     @GetMapping("/web/workspaces/{repoOwner}/{repoName}/diff")
     public String diff(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         Model model
     ) {
         DiffResponse diffResponse = diffService.diff(repoOwner, repoName, true, 0);
@@ -248,8 +246,8 @@ public class WorkbenchViewController {
 
     @PostMapping("/web/workspaces/{repoOwner}/{repoName}/launch-ide")
     public String launchIde(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         RedirectAttributes redirectAttributes
     ) {
         try {
@@ -269,8 +267,8 @@ public class WorkbenchViewController {
 
     @PostMapping("/web/workspaces/{repoOwner}/{repoName}/pr/prepare")
     public String prepareForPr(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         RedirectAttributes redirectAttributes
     ) {
         try {
@@ -315,8 +313,8 @@ public class WorkbenchViewController {
 
     @GetMapping("/web/workspaces/{repoOwner}/{repoName}/commit")
     public String commit(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         Model model,
         RedirectAttributes redirectAttributes
     ) {
@@ -350,8 +348,8 @@ public class WorkbenchViewController {
 
     @PostMapping("/web/workspaces/{repoOwner}/{repoName}/commit-push")
     public String commitPush(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         @Valid @ModelAttribute("commitPushForm") CommitPushRequest commitPushForm,
         BindingResult bindingResult,
         RedirectAttributes redirectAttributes
@@ -381,8 +379,8 @@ public class WorkbenchViewController {
 
     @GetMapping("/web/workspaces/{repoOwner}/{repoName}/pr")
     public String pr(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         Model model,
         RedirectAttributes redirectAttributes
     ) {
@@ -420,8 +418,8 @@ public class WorkbenchViewController {
 
     @PostMapping("/web/workspaces/{repoOwner}/{repoName}/create-pr")
     public String createPr(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         @RequestParam("title") String title,
         @RequestParam("body") String body,
         @RequestParam(name = "base", required = false) String base,
@@ -471,8 +469,8 @@ public class WorkbenchViewController {
 
     @PostMapping("/web/workspaces/{repoOwner}/{repoName}/delete")
     public String delete(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName,
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName,
         RedirectAttributes redirectAttributes
     ) {
         try {

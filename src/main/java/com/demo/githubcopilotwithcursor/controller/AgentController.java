@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/agents")
 public class AgentController {
-
-    private static final String REPO_SEGMENT_PATTERN = "^[A-Za-z0-9._-]+$";
 
     private final AgentOrchestratorService agentOrchestratorService;
 
@@ -54,8 +51,8 @@ public class AgentController {
         @ApiResponse(responseCode = "502", description = "Agent 실패 또는 sync 실패", content = @Content(schema = @Schema(implementation = com.demo.githubcopilotwithcursor.dto.ErrorResponse.class)))
     })
     public ResponseEntity<AgentStatusJsonResponse> status(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName
     ) {
         return ResponseEntity.ok(agentOrchestratorService.getStatus(repoOwner, repoName));
     }
@@ -63,8 +60,8 @@ public class AgentController {
     @PostMapping("/{repoOwner}/{repoName}/cancel")
     @Operation(summary = "작동중인 Agent 취소", description = "실행 중인 Cursor Cloud Agent를 취소합니다.")
     public ResponseEntity<AgentCancelResponse> cancel(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName
     ) {
         return ResponseEntity.ok(agentOrchestratorService.cancel(repoOwner, repoName));
     }
@@ -72,8 +69,8 @@ public class AgentController {
     @PostMapping("/{repoOwner}/{repoName}/sync")
     @Operation(summary = "Agent branch 수동 동기화", description = "origin feature branch를 ff-only pull로 동기화합니다.")
     public ResponseEntity<AgentSyncResponse> sync(
-        @PathVariable("repoOwner") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoOwner,
-        @PathVariable("repoName") @Pattern(regexp = REPO_SEGMENT_PATTERN) String repoName
+        @PathVariable("repoOwner") String repoOwner,
+        @PathVariable("repoName") String repoName
     ) {
         return ResponseEntity.ok(agentOrchestratorService.sync(repoOwner, repoName));
     }
