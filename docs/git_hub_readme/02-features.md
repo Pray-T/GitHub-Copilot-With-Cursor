@@ -16,11 +16,14 @@ Review와 동일 + Diff에서 「PR 진행」:
 
 - `POST /api/contribute/{repoOwner}/{repoName}/pr/prepare` — **diff fingerprint** 일치 시 DB `llm_*` 캐시 재사용; 불일치(IDE 추가 수정 등) 시 repo Agent **follow-up run** 재호출 (실패 시 fallback)
 - 동일 diff에서 「PR 진행」 재클릭 → follow-up **1회만** (cache hit). diff 변경 후 재클릭 → follow-up 재호출 + `metadataRegeneratedDueToDiffChange=true` (REST) / flash 안내 (웹)
-- `diff.html` stale 배너: 캐시 fingerprint ≠ 현재 diff 시 PR 메타가 옛 변경을 반영할 수 있음을 경고
 - uncommitted 있으면 commit 폼 → push → PR 폼 (`WorkspaceGitStateService.hasUncommittedChanges`)
-- upstream draft PR 생성 (`PullRequestService` 단일 출구). **PR 생성 직전** 로컬 branch에 origin 미반영 commit이 있으면 `ensureBranchPushed`가 **no-force push** 후 PR 생성 (FR-8.6)
+- upstream draft PR 생성 (`PullRequestService` 단일 출구). <br>
+**PR 생성 직전** 로컬 branch에 origin 미반영 commit이 있으면 `ensureBranchPushed`가 **no-force push** 후 PR 생성
 
 ## REST API 요약
+
+<details>
+<summary>클릭하면 REST API 표가 펼쳐집니다</summary>
 
 | Method | Path | 용도 |
 |--------|------|------|
@@ -39,7 +42,12 @@ Review와 동일 + Diff에서 「PR 진행」:
 | POST | `/api/workspaces/{repoOwner}/{repoName}/launch-ide` | IDE 실행 (REST) |
 | DELETE | `/api/workspaces/{repoOwner}/{repoName}` | 로컬 DB·디스크 삭제 |
 
+</details>
+
 ## Web UI 경로
+
+<details>
+<summary>클릭하면 Web UI 경로 표가 펼쳐집니다</summary>
 
 | Method | Path | 용도 |
 |--------|------|------|
@@ -56,6 +64,8 @@ Review와 동일 + Diff에서 「PR 진행」:
 | POST | `/web/workspaces/{repoOwner}/{repoName}/create-pr` | PR 생성 |
 | POST | `/web/workspaces/{repoOwner}/{repoName}/delete` | 워크스페이스 삭제 |
 
-## 운영 주의
+</details>
 
-- **워크스페이스 삭제**: 로컬 DB·디스크만 정리. GitHub fork branch·PR은 수동으로 정리해줘야 합니다.
+## 주의
+
+- **워크스페이스 삭제**: 로컬 DB와 디스크만 정리합니다. GitHub fork branch와 PR은 수동으로 정리하셔야 합니다.

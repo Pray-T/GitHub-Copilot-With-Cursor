@@ -2,10 +2,6 @@
 
  [메인 README로 돌아가기](../../README.md)
 
-## 한 줄 요약
-
-Browser → Spring Boot(:8080) → Cursor Cloud Agents API + GitHub API + JGit + MySQL
-
 ## 흐름 (Review·Contribute 공통)
 
 ```mermaid

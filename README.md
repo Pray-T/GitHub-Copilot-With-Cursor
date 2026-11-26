@@ -3,19 +3,14 @@
 **긍정적으로 일하고 세상에 도움이 되는 사람이 되자.**
   
 
+안녕하세요. 먼저 귀한 시간을 내어 저의 깃허브에 방문해 주신 것에 감사드립니다.  
+<br>
+이 프로젝트는 자연어 프롬프트만으로 제 3자의 깃허브에 기여를 하면 좋겠다! 라는 생각에서 시작한 앱입니다.
+<br>
+"GitHub Copilot Coding Agent"와 유사한 **리포지토리 에이전트 워크플로**를, **Cursor Cloud Agents API**와 **Spring Boot**로 직접 구현한 앱입니다.   
   
 
-안녕하세요 먼저 귀한 시간을 내어 저의 깃허브에 방문해 주신 것에 감사드립니다.  
-
-저는 팀의 일원으로서 팀원들과 함께 좋은 에너지를 만들며 일하고 싶고, 동시에 혼자 고민하는 시간을 통해 전문가로서의 역량을 기르고자 하고 적은 비용으로 어떻게 하면 많은 효과를 누릴 수 있을까? 하고 생각하는 개발자입니다.
-  
-
-  
-
-이 프로젝트는 "GitHub Copilot Coding Agent"와 유사한 **리포지토리 에이전트 워크플로**를, **Cursor Cloud Agents API**와 **Spring Boot**로 직접 구현한 풀스택 포트폴리오 프로젝트입니다.   
-  
-
-**한줄 소개:** **GitHub URL + 자연어 프롬프트** → Cursor Cloud Agent가 fork branch에 코드를 수정 → Spring Boot가 pull·Diff·(선택) PR까지 처리하는 **Cloud-first 리포지토리 워크벤치**입니다.
+**한 줄로 정리하는 흐름:** **GitHub URL + 자연어 프롬프트** → Cursor Cloud Agent가 fork branch에 코드를 수정 → Spring Boot가 pull·Diff·PR까지 처리하는 앱입니다.
 
 ## 화면
 
@@ -54,19 +49,10 @@ Diff 확인 후 「PR 진행」을 누르면 Composer가 커밋 메시지 · PR 
 
 </details>
 
-
-
-### 성과 · 규모 하이라이트
-
-- **운영 모드 2종** — Review(Diff·로컬 보관) · Contribute(commit + upstream PR)
-- **단위·통합 테스트 약 90개** — 테스트 클래스 30여 개 (`MockMvc` E2E·서비스·GitHub/Cursor 클라이언트)
-- **Flyway 마이그레이션 7단계** — V1 초기 스키마 ~ V7 `llm_diff_fingerprint` 캐시
-- **외부 API 직접 연동** — Cursor Cloud Agents · GitHub REST를 Spring `RestClient`로 호출
-
-
-
 ## 기술 스택
 
+<details>
+<summary>클릭하면 기술 스택이 펼쳐집니다</summary>
 
 <table>
 <thead>
@@ -111,24 +97,12 @@ Diff 확인 후 「PR 진행」을 누르면 Composer가 커밋 메시지 · PR 
 </tbody>
 </table>
 
-
-
-
-## 왜 만들었나
-
-GitHub Copilot Coding Agent처럼 *"프롬프트만 주면 에이전트가 알아서 브랜치를 만들고 코드를 고쳐 PR을 올리는"* 워크플로를 **Cursor Cloud Agents API를 Spring Boot에서 직접 호출**해서 재현해보고 싶었습니다.
-
-실서비스에서 마주치는 관심사를 더 저렴하게 만들어볼 수 없을까?하는 생각에서 출발한 프로젝트입니다.
-
-- **외부 에이전트 API 연동** — 에이전트 실행·상태 폴링·완료 후 동기화
-- **Git 자동화** — JGit 기반 fork·branch·pull·Diff·commit·upstream PR
-- **운영 관심사** — 토큰 보안(마스킹), DB 마이그레이션, 워크스페이스 정리 스케줄러
-
-
+</details>
 
 ## 빠른 시작
 
-
+<details>
+<summary>클릭하면 사전 요구·환경 변수·기동이 펼쳐집니다</summary>
 
 ### 사전 요구
 
@@ -152,12 +126,10 @@ $env:CURSOR_API_KEY = "key_..."
 
 → [http://localhost:8080](http://localhost:8080) · [Swagger UI](http://localhost:8080/swagger-ui.html)
 
-  
-
+</details>
 
 ## 에이전트 협력 방식
-
-위 화면과 기동 방법은 **이 앱이 무엇을 하는지**입니다. 이 절은 **이 저장소를 여러 에이전트가 어떻게 협력하여 만들었는지**입니다.
+**이 저장소를 여러 에이전트가 어떻게 협력하여 만들었는지**입니다.
 
 에이전트는 세션이 끝나면 이전 대화를 공유하지 않습니다. 그래서 `.cursorrules`에 역할과 금지를 적고, 기획 문서에 무엇을 만들지 고정하고, `STATUS.md`에 지금 어디까지인지를 남깁니다. 파일을 고치고 명령을 실행하는 것은 Cursor가 합니다. 문서는 세션이 바뀌어도 기획·구현·테스트 에이전트가 **같은 규칙과 같은 인수인계**를 보게 합니다.
 
@@ -177,32 +149,28 @@ $env:CURSOR_API_KEY = "key_..."
 
 *아래 링크를 클릭하시면 해당 상세 페이지로 이동합니다.*
 
-## [1.웹앱 흐름 및 아키텍처 개요](./docs/git_hub_readme/01-architecture.md)
+## [1. 웹앱 흐름 및 아키텍처 개요](./docs/git_hub_readme/01-architecture.md)
 
-Browser → Spring Boot → Cursor Cloud Agent · GitHub · JGit · MySQL 흐름, `repoOwner`/`repoName` 경로 규칙, 시퀀스 다이어그램, 화면 흐름(`index` → `wait` → `diff` → `commit` → `pr`).
+Browser → Spring Boot → Cursor Cloud Agent · GitHub · JGit · MySQL 흐름.
 
-## [2.주요 기능](./docs/git_hub_readme/02-features.md)
+## [2. 주요 기능](./docs/git_hub_readme/02-features.md)
 
 Review·Contribute 모드, Agent wait 폴링, Diff 확인, 로컬 IDE 추가 수정, REST·Web API 요약표.
 
-## [3.기술적 고민 및 아키텍처 결정](./docs/git_hub_readme/03-tech-decisions.md)
+## [3. 기술적 고민 및 아키텍처 결정](./docs/git_hub_readme/03-tech-decisions.md)
 
-- Composer 2.5 Fast(`fast=true`) 모델 고정 및 `autoCreatePR=false` 정책
-- Agent push 후 Spring `fetch`/`pull --ff-only` 기반 Diff
-- PR 메타: 코드 수정에 사용했던 같은 Agent에 **follow-up**을 보내 작성한다. 새로운 Agent가 PR메타를 작성하여 환각 증세를 방지하기 위함입니다.
-- PR 메타 캐시: **diff fingerprint**로 hit/miss 판정 (IDE 추가 수정 시 재생성)
-- `WorkspaceGitStateService`로 uncommitted/unpushed JGit 상태 판정 · PR 생성 직전 **no-force push** (`ensureBranchPushed`, FR-8.6)
-- Flyway V7 `llm_diff_fingerprint`, 토큰 마스킹(`AuthorizationMaskingInterceptor`) 등
+- Agent 모델 고정
+- Spring `fetch`/`pull --ff-only` 기반 Diff
+- 수정에 사용했던 같은 Agent에 **follow-up**을 보내 PR메타 작성.(코드를 수정한 기존의 Agent가 PR메타를 작성하여 환각 증세를 방지하기 위함입니다.)
+- PR 메타 캐시: **diff fingerprint**로 hit/miss 판정 
 
+## [4. 문제 해결](./docs/git_hub_readme/04-troubleshooting.md)
 
+PR 메타 캐시, Flyway 오류
 
-## [4.문제 해결](./docs/git_hub_readme/04-troubleshooting.md)
+## [5. 에이전트 협력 방식](./docs/git_hub_readme/05-agent-collaboration.md)
 
-Composer fallback, 재클론 실패, Flyway 오류, GitHub 잔존 리소스.
-
-## [5.에이전트 협력 방식](./docs/git_hub_readme/05-agent-collaboration.md)
-
-문서와 역할로 기획·구현·테스트를 나눈 방식. `.cursorrules` 권한, AgentA→AgentC→AgentB 체인, 사전지식과 실시간 인수인계의 구분.
+문서를 통한 에이전트의 역할 구분, AgentA→AgentC→AgentB 체인
 
   
 
@@ -212,7 +180,7 @@ Composer fallback, 재클론 실패, Flyway 오류, GitHub 잔존 리소스.
 
 ## 다른 포트폴리오
 
-- [은행 이체 REST API를 통해 MySQL 동시성 정합성과 Redis 멱등성/스로틀을 중심으로 구현, 대량 데이터 인덱스 조회 실험 검증](https://github.com/Pray-T/BankTransferSys_Backend_Restful) 
-- [AWS에 배포·운영한 JWT+Redis 이중 토큰 인증과 실시간 채팅 웹 앱](https://github.com/Pray-T/ReadyPlz-Production_main)
+- [동시성, 정합성을 중심으로 은행의 이체를 구현 해본 프로젝트](https://github.com/Pray-T/BankTransferSys_Backend_Restful) 
+- [AWS에 배포했던 전세계 Steam 유저 채팅 앱](https://github.com/Pray-T/ReadyPlz-Production_main)
 
 **이상입니다, 저의 깃허브 방문을 감사드립니다.**

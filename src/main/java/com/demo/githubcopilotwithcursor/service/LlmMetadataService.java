@@ -57,6 +57,13 @@ public class LlmMetadataService {
         this.workspaceGitStateService = workspaceGitStateService;
     }
 
+    /**
+     * TODO: 트랜잭션을 분리한다.
+     * 지금은 메서드 전체가 한 트랜잭션이라 Composer follow-up 대기(최대 120초) 동안 DB 커넥션을 점유한다.
+     * 로컬 사용일 때는 괜찮지만 사용자가 많아지면 커넥션 풀이 부족해질것이다. 이것을 고려하여 추후에는 트랜잭션을 분리해야 좋다.
+     * 워크스페이스 조회 트랜잭션을 먼저 끝내고, Cursor 호출은 트랜잭션 밖에서 수행한다.
+     * 메타데이터 저장 트랜잭션 안에서 워크스페이스를 다시 읽은 뒤 cacheLlmMetadata와 saveWorkspace만 커밋한다.
+     */
     @Transactional
     public PrPrepareResponse prepareForPr(String repoOwner, String repoName) {
         RepositoryWorkspace workspace = workspaceService.requireContributeWorkspace(repoOwner, repoName);
