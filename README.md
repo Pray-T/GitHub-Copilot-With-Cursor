@@ -180,7 +180,7 @@ PR 메타 캐시, Flyway 오류
 
 ## 다른 포트폴리오
 
-- [동시성, 정합성을 중심으로 은행의 이체를 구현 해본 프로젝트](https://github.com/Pray-T/BankTransferSys_Backend_Restful) 
+- [MySQL의 동시성, 정합성을 중심으로 은행의 이체를 구현 해본 프로젝트](https://github.com/Pray-T/BankTransferSys_Backend_Restful) 
 - [AWS에 배포했던 전세계 Steam 유저 채팅 앱](https://github.com/Pray-T/ReadyPlz-Production_main)
 
 **이상입니다, 저의 깃허브 방문을 감사드립니다.**
